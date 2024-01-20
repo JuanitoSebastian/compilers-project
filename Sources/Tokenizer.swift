@@ -1,20 +1,52 @@
+import Foundation
+
 struct Tokenizer {
-  let INTEGER_REGEX = #/[0-9]+/#
-  let IDENTIFIER_REGEX = #/[a-zA-Z][a-zA-Z0-9]*#/
+  let input: String
+  let file: String?
+  var tokens: [Token]
 
-  func tokenize(_ input: String) -> [Token] {
-    let tokens: [Token] = []
-    // Iterate substrings of input 
-    for position in input.indices {
-      let partToMatch = input[position..<input.endIndex]
-      let token = match(partToMatch)
-    }
-
-    return tokens
+  init(input: String, file: String? = nil) {
+    self.input = input
+    self.file = file
+    self.tokens = []
   }
 
-  func match(_ input: Substring) -> Token? {
-    
+  mutating func tokenize(){
+    var positionIndex = input.startIndex
+    while positionIndex < input.endIndex {
+      if let token = match(
+        input[positionIndex...], positionIndex: positionIndex)
+      {
+        tokens.append(token)
+        positionIndex = input.index(positionIndex, offsetBy: token.value.count)
+      } else {
+        positionIndex = input.index(after: positionIndex)
+      }
+    }
+  }
+
+  func match(_ input: Substring, positionIndex: Substring.Index) -> Token? {
+    if let matcher = RegexMatcher(INTEGER_REGEX, input: String(input)) {
+      let range = Range<String.Index>(
+        uncheckedBounds: (
+          lower: positionIndex,
+          upper: input.base.index(positionIndex, offsetBy: matcher.matchedString.count)
+        ))
+      return Token(
+        value: matcher.matchedString, type: .integerLiteral,
+        location: Location(file: file, position: range))
+    }
+
+    if let matcher = RegexMatcher(IDENTIFIER_REGEX, input: String(input)) {
+      let range = Range<String.Index>(
+        uncheckedBounds: (
+          lower: positionIndex,
+          upper: input.base.index(positionIndex, offsetBy: matcher.matchedString.count)
+        ))
+      return Token(
+        value: matcher.matchedString, type: .identifier,
+        location: Location(file: file, position: range))
+    }
     return nil
   }
 }

@@ -1,5 +1,5 @@
 enum TokenType {
-  case integer
+  case integerLiteral
   case op
   case puncuation
   case identifier
