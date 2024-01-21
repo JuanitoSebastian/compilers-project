@@ -37,3 +37,4 @@ struct RegexMatcher {
 let INTEGER_REGEX = "^[0-9]+"
 let IDENTIFIER_REGEX = "^[a-zA-Z][a-zA-Z0-9]*"
 let OPERATOR_REGEX = "^[-+*/]"
+let LINE_COMMENT_REGEX = "^//.*\n"
