@@ -51,8 +51,10 @@ struct Tokenizer {
           return Operator(
             stringRepresentation: matcher.matchedString,
             location: Location(file: file, position: range))
-        default:
-          fatalError("Not implemented")
+        case .punctuation:
+          return Punctuation(
+            value: matcher.matchedString, stringRepresentation: matcher.matchedString,
+            location: Location(file: file, position: range))
         }
       }
     }
