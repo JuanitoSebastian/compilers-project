@@ -5,7 +5,6 @@ import PackageDescription
 
 let package = Package(
   name: "swiftcompiler",
-  platforms: [.macOS(.v10_15)],
   dependencies: [
     .package(url: "https://github.com/realm/SwiftLint.git", from: "0.54.0"),
     .package(url: "https://github.com/apple/swift-format.git", from: "509.0.0")
