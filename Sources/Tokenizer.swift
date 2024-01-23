@@ -11,14 +11,14 @@ struct Tokenizer {
     self.tokens = []
   }
 
-  mutating func tokenize(){
+  mutating func tokenize() {
     var positionIndex = input.startIndex
     while positionIndex < input.endIndex {
       if let token = match(
         input[positionIndex...], positionIndex: positionIndex)
       {
-        tokens.append(token)
-        positionIndex = input.index(positionIndex, offsetBy: token.value.count)
+        if token.type != .lineComment { tokens.append(token) }
+        positionIndex = input.index(positionIndex, offsetBy: token.stringRepresentation.count)
       } else {
         positionIndex = input.index(after: positionIndex)
       }
@@ -26,26 +26,35 @@ struct Tokenizer {
   }
 
   func match(_ input: Substring, positionIndex: Substring.Index) -> Token? {
-    if let matcher = RegexMatcher(INTEGER_REGEX, input: String(input)) {
-      let range = Range<String.Index>(
-        uncheckedBounds: (
-          lower: positionIndex,
-          upper: input.base.index(positionIndex, offsetBy: matcher.matchedString.count)
-        ))
-      return Token(
-        value: matcher.matchedString, type: .integerLiteral,
-        location: Location(file: file, position: range))
-    }
-
-    if let matcher = RegexMatcher(IDENTIFIER_REGEX, input: String(input)) {
-      let range = Range<String.Index>(
-        uncheckedBounds: (
-          lower: positionIndex,
-          upper: input.base.index(positionIndex, offsetBy: matcher.matchedString.count)
-        ))
-      return Token(
-        value: matcher.matchedString, type: .identifier,
-        location: Location(file: file, position: range))
+    for tokenType in TokenType.allCases {
+      if let matcher = RegexMatcher(tokenType.regex, input: String(input)) {
+        let range = Range<String.Index>(
+          uncheckedBounds: (
+            lower: positionIndex,
+            upper: input.base.index(positionIndex, offsetBy: matcher.matchedString.count)
+          ))
+        switch tokenType {
+        case .integerLiteral:
+          return IntegerLiteral(
+            stringRepresentation: matcher.matchedString,
+            location: Location(file: file, position: range)
+          )
+        case .identifier:
+          return Identifier(
+            value: matcher.matchedString, stringRepresentation: matcher.matchedString,
+            location: Location(file: file, position: range))
+        case .lineComment:
+          return LineComment(
+            value: matcher.matchedString, stringRepresentation: matcher.matchedString,
+            location: Location(file: file, position: range))
+        case .op:
+          return Operator(
+            stringRepresentation: matcher.matchedString,
+            location: Location(file: file, position: range))
+        default:
+          fatalError("Not implemented")
+        }
+      }
     }
     return nil
   }
