@@ -80,4 +80,36 @@ final class TokenizerTests: XCTestCase {
         Punctuation(
           value: "}", stringRepresentation: "}", location: L))
   }
+
+  func test_d_parse_and_check_token_position() throws {
+    let input = "int hundred = 100"
+    let expected = ["int", "hundred", "=", "100"];
+    var tokenizer = Tokenizer(input: input)
+    tokenizer.tokenize()
+    XCTAssertEqual(tokenizer.tokens.count, expected.count)
+    tokenizer.tokens.enumerated().forEach( { (index, token) in
+      XCTAssertEqual(token.stringRepresentation, expected[index])
+    })
+  }
+
+  func test_e_parse_if() throws {
+    let input = "if (a == 3) { b = 4 }"
+    let expected = ["if", "(", "a", "==", "3", ")", "{", "b", "=", "4", "}"];
+    var tokenizer = Tokenizer(input: input)
+    tokenizer.tokenize()
+    XCTAssertEqual(tokenizer.tokens.count, expected.count)
+    tokenizer.tokens.enumerated().forEach( { (index, token) in
+      XCTAssertEqual(token.stringRepresentation, expected[index])
+    })
+  }
+
+  func test_f_token_location_returns_appropariate_section_of_string() throws {
+    let input = "if (a == 3) { b = 4 }"
+    var tokenizer = Tokenizer(input: input)
+    tokenizer.tokenize()
+    for token in tokenizer.tokens {
+      let range = token.location.position!
+      XCTAssertEqual(token.stringRepresentation, String(input[range]))
+    }
+  }
 }

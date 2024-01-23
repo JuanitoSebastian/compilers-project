@@ -23,6 +23,6 @@ enum TokenType: CaseIterable {
 
 let INTEGER_REGEX = "^[0-9]+"
 let IDENTIFIER_REGEX = "^[a-zA-Z][a-zA-Z0-9]*"
-let OPERATOR_REGEX = "^[\\-+*/]$"
+let OPERATOR_REGEX = "^={1,2}|^[-+*/]$"
 let LINE_COMMENT_REGEX = "^//.*\n"
 let PUNCTUATION_REGEX = "^[(|)|{|}|[|]]"
