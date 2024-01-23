@@ -3,7 +3,7 @@ enum TokenType: CaseIterable {
   case lineComment
   case op
   case identifier
-  case puncuation
+  case punctuation
 
   var regex: String {
     switch self {
@@ -11,8 +11,8 @@ enum TokenType: CaseIterable {
       return INTEGER_REGEX
     case .op:
       return OPERATOR_REGEX
-    case .puncuation:
-      return "^[(),]"
+    case .punctuation:
+      return PUNCTUATION_REGEX
     case .identifier:
       return IDENTIFIER_REGEX
     case .lineComment:
