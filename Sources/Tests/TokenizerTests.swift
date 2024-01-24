@@ -83,7 +83,7 @@ final class TokenizerTests: XCTestCase {
 
   func test_d_parse_and_check_token_position() throws {
     let input = "int hundred = 100"
-    let expected = ["int", "hundred", "=", "100"];
+    let expected = ["int", "hundred", "=", "100"]
     var tokenizer = Tokenizer(input: input)
     tokenizer.tokenize()
     XCTAssertEqual(tokenizer.tokens.count, expected.count)
@@ -94,7 +94,7 @@ final class TokenizerTests: XCTestCase {
 
   func test_e_parse_if() throws {
     let input = "if (a == 3) { b = 4 }"
-    let expected = ["if", "(", "a", "==", "3", ")", "{", "b", "=", "4", "}"];
+    let expected = ["if", "(", "a", "==", "3", ")", "{", "b", "=", "4", "}"]
     var tokenizer = Tokenizer(input: input)
     tokenizer.tokenize()
     XCTAssertEqual(tokenizer.tokens.count, expected.count)
