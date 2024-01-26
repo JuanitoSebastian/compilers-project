@@ -37,28 +37,28 @@ struct Tokenizer {
           ))
         switch tokenType {
         case .integerLiteral:
-          return IntegerLiteral(
+          return IntegerLiteralToken(
             stringRepresentation: matcher.matchedString,
             location: Location(file: file, position: range, line: line)
           )
         case .identifier:
-          return Identifier(
+          return IdentifierToken(
             value: matcher.matchedString, stringRepresentation: matcher.matchedString,
             location: Location(file: file, position: range, line: line))
         case .lineComment:
-          return LineComment(
+          return LineCommentToken(
             value: matcher.matchedString, stringRepresentation: matcher.matchedString,
             location: Location(file: file, position: range, line: line))
         case .op:
-          return Operator(
+          return OperatorToken(
             stringRepresentation: matcher.matchedString,
             location: Location(file: file, position: range, line: line))
         case .punctuation:
-          return Punctuation(
+          return PunctuationToken(
             value: matcher.matchedString, stringRepresentation: matcher.matchedString,
             location: Location(file: file, position: range, line: line))
         case .newLine:
-          return NewLine(
+          return NewLineToken(
             stringRepresentation: matcher.matchedString,
             location: Location(file: file, position: range, line: line))
         }

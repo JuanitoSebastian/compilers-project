@@ -1,4 +1,4 @@
-struct Operator: Token, Equatable {
+struct OperatorToken: Token, Equatable {
   let stringRepresentation: String
   let location: Location
 
@@ -7,10 +7,10 @@ struct Operator: Token, Equatable {
   }
 
   var description: String {
-    return "Operator(stringRepresentation: \(stringRepresentation), location: \(location))"
+    return "OperatorToken(stringRepresentation: \(stringRepresentation), location: \(location))"
   }
 
-  static func == (lhs: Operator, rhs: Operator) -> Bool {
+  static func == (lhs: OperatorToken, rhs: OperatorToken) -> Bool {
     return lhs.stringRepresentation == rhs.stringRepresentation && lhs.location == rhs.location
   }
 }

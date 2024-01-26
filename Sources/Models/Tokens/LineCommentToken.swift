@@ -1,16 +1,17 @@
-struct Punctuation: Token, Equatable {
+struct LineCommentToken: Token, Equatable {
   let value: String
   let stringRepresentation: String
   let location: Location
 
   var type: TokenType {
-    return .punctuation
-  }
-  var description: String {
-    return "Punctuation(value: \(value))"
+    return .lineComment
   }
 
-  static func == (lhs: Punctuation, rhs: Punctuation) -> Bool {
+  var description: String {
+    return "LineCommentToken(value: \(value), location: \(location))"
+  }
+
+  static func == (lhs: LineCommentToken, rhs: LineCommentToken) -> Bool {
     return lhs.value == rhs.value && lhs.location == rhs.location
   }
 }

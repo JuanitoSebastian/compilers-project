@@ -21,49 +21,49 @@ final class TokenizerTests: XCTestCase {
     tokenizer.tokenize()
     XCTAssertEqual(tokenizer.tokens.count, 12)
     XCTAssertEqual(
-      tokenizer.tokens[0] as? Identifier,
-        Identifier(
+      tokenizer.tokens[0] as? IdentifierToken,
+        IdentifierToken(
           value: "if", stringRepresentation: "if", location: L(0)))
     XCTAssertEqual(
-      tokenizer.tokens[1] as? IntegerLiteral,
-        IntegerLiteral(
+      tokenizer.tokens[1] as? IntegerLiteralToken,
+        IntegerLiteralToken(
           value: 3, stringRepresentation: "3", location: L(0)))
     XCTAssertEqual(
-      tokenizer.tokens[2] as? Identifier,
-        Identifier(
+      tokenizer.tokens[2] as? IdentifierToken,
+        IdentifierToken(
           value: "while", stringRepresentation: "while", location: L(1)))
-    XCTAssertEqual(tokenizer.tokens[3] as? Punctuation,
-      Punctuation(
+    XCTAssertEqual(tokenizer.tokens[3] as? PunctuationToken,
+      PunctuationToken(
         value: "{", stringRepresentation: "{", location: L(1)))
     XCTAssertEqual(
-      tokenizer.tokens[4] as? Identifier,
-        Identifier(
+      tokenizer.tokens[4] as? IdentifierToken,
+        IdentifierToken(
           value: "var", stringRepresentation: "var", location: L(2)))
     XCTAssertEqual(
-      tokenizer.tokens[5] as? Operator,
-        Operator(stringRepresentation: "=", location: L(2)))
+      tokenizer.tokens[5] as? OperatorToken,
+        OperatorToken(stringRepresentation: "=", location: L(2)))
     XCTAssertEqual(
-      tokenizer.tokens[6] as? Punctuation,
-        Punctuation(
+      tokenizer.tokens[6] as? PunctuationToken,
+        PunctuationToken(
           value: "(", stringRepresentation: "(", location: L(2)))
     XCTAssertEqual(
-      tokenizer.tokens[7] as? IntegerLiteral,
-        IntegerLiteral(
+      tokenizer.tokens[7] as? IntegerLiteralToken,
+        IntegerLiteralToken(
           value: 2, stringRepresentation: "2", location: L(2)))
     XCTAssertEqual(
-      tokenizer.tokens[8] as? Operator,
-        Operator(stringRepresentation: "+", location: L(2)))
+      tokenizer.tokens[8] as? OperatorToken,
+        OperatorToken(stringRepresentation: "+", location: L(2)))
     XCTAssertEqual(
-      tokenizer.tokens[9] as? IntegerLiteral,
-        IntegerLiteral(
+      tokenizer.tokens[9] as? IntegerLiteralToken,
+        IntegerLiteralToken(
           value: 3, stringRepresentation: "3", location: L(2)))
     XCTAssertEqual(
-      tokenizer.tokens[10] as? Punctuation,
-        Punctuation(
+      tokenizer.tokens[10] as? PunctuationToken,
+        PunctuationToken(
           value: ")", stringRepresentation: ")", location: L(2)))
     XCTAssertEqual(
-      tokenizer.tokens[11] as? Punctuation,
-        Punctuation(
+      tokenizer.tokens[11] as? PunctuationToken,
+        PunctuationToken(
           value: "}", stringRepresentation: "}", location: L(3)))
   }
 
@@ -77,16 +77,16 @@ final class TokenizerTests: XCTestCase {
     tokenizer.tokenize()
     XCTAssertEqual(tokenizer.tokens.count, 3)
     XCTAssertEqual(
-      tokenizer.tokens[0] as? Identifier,
-        Identifier(
+      tokenizer.tokens[0] as? IdentifierToken,
+        IdentifierToken(
           value: "if", stringRepresentation: "if", location: L(0)))
     XCTAssertEqual(
-      tokenizer.tokens[1] as? IntegerLiteral,
-        IntegerLiteral(
+      tokenizer.tokens[1] as? IntegerLiteralToken,
+        IntegerLiteralToken(
           value: 3, stringRepresentation: "3", location: L(0)))
     XCTAssertEqual(
-      tokenizer.tokens[2] as? Identifier,
-        Identifier(
+      tokenizer.tokens[2] as? IdentifierToken,
+        IdentifierToken(
           value: "for", stringRepresentation: "for", location: L(2)))
   }
 
@@ -112,7 +112,7 @@ final class TokenizerTests: XCTestCase {
     })
   }
 
-  func test_d_operators_tokenized_correctly() throws {
+  func test_d_OperatorTokens_tokenized_correctly() throws {
     let input = """
     + - * / % = == != < > <= >=
     """

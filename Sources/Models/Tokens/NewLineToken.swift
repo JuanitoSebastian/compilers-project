@@ -1,13 +1,13 @@
-struct NewLine: Token, Equatable {
+struct NewLineToken: Token, Equatable {
   let type: TokenType = .newLine
   let stringRepresentation: String
   let location: Location
 
   var description: String {
-    return "NewLine(\(stringRepresentation))"
+    return "NewLineToken(\(stringRepresentation))"
   }
 
-  static func == (lhs: NewLine, rhs: NewLine) -> Bool {
+  static func == (lhs: NewLineToken, rhs: NewLineToken) -> Bool {
     return lhs.stringRepresentation == rhs.stringRepresentation && lhs.location == rhs.location
   }
 }

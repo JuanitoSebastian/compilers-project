@@ -1,4 +1,4 @@
-struct IntegerLiteral: Token, Equatable {
+struct IntegerLiteralToken: Token, Equatable {
   let value: Int
   let stringRepresentation: String
   let location: Location
@@ -23,10 +23,10 @@ struct IntegerLiteral: Token, Equatable {
   }
 
   var description: String {
-    return "IntegerLiteral(value: \(value), location: \(location))"
+    return "IntegerLiteralToken(value: \(value), location: \(location))"
   }
 
-  static func == (lhs: IntegerLiteral, rhs: IntegerLiteral) -> Bool {
+  static func == (lhs: IntegerLiteralToken, rhs: IntegerLiteralToken) -> Bool {
     return lhs.value == rhs.value && lhs.location == rhs.location
   }
 }

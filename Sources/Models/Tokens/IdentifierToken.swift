@@ -1,4 +1,4 @@
-struct Identifier: Token, Equatable {
+struct IdentifierToken: Token, Equatable {
   let value: String
   let stringRepresentation: String
   let location: Location
@@ -8,10 +8,10 @@ struct Identifier: Token, Equatable {
   }
 
   var description: String {
-    return "Identifier(value: \(value), location: \(location))"
+    return "IdentifierToken(value: \(value), location: \(location))"
   }
 
-  static func == (lhs: Identifier, rhs: Identifier) -> Bool {
+  static func == (lhs: IdentifierToken, rhs: IdentifierToken) -> Bool {
     return lhs.value == rhs.value && lhs.location == rhs.location
   }
 }
