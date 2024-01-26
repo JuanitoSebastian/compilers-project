@@ -1,6 +1,4 @@
 import XCTest
-import SwiftSyntax
-import SwiftSyntaxMacros
 
 @testable import swiftcompiler
 
