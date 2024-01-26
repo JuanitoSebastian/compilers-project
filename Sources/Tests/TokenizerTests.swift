@@ -1,3 +1,5 @@
+// swiftlint:disable function_body_length
+
 import XCTest
 
 @testable import swiftcompiler
@@ -8,14 +10,16 @@ func L(_ line: Int) -> Location {
 }
 
 final class TokenizerTests: XCTestCase {
-  func test_a_parsing_with_identifiers_and_integers() throws {
+  func test_a_tokens_recognized_correctly() throws {
     let input = """
     if  3
-    while
+    while {
+      var = (2 + 3)
+    }
     """
     var tokenizer = Tokenizer(input: input)
     tokenizer.tokenize()
-    XCTAssertEqual(tokenizer.tokens.count, 3)
+    XCTAssertEqual(tokenizer.tokens.count, 12)
     XCTAssertEqual(
       tokenizer.tokens[0] as? Identifier,
         Identifier(
@@ -28,6 +32,39 @@ final class TokenizerTests: XCTestCase {
       tokenizer.tokens[2] as? Identifier,
         Identifier(
           value: "while", stringRepresentation: "while", location: L(1)))
+    XCTAssertEqual(tokenizer.tokens[3] as? Punctuation,
+      Punctuation(
+        value: "{", stringRepresentation: "{", location: L(1)))
+    XCTAssertEqual(
+      tokenizer.tokens[4] as? Identifier,
+        Identifier(
+          value: "var", stringRepresentation: "var", location: L(2)))
+    XCTAssertEqual(
+      tokenizer.tokens[5] as? Operator,
+        Operator(stringRepresentation: "=", location: L(2)))
+    XCTAssertEqual(
+      tokenizer.tokens[6] as? Punctuation,
+        Punctuation(
+          value: "(", stringRepresentation: "(", location: L(2)))
+    XCTAssertEqual(
+      tokenizer.tokens[7] as? IntegerLiteral,
+        IntegerLiteral(
+          value: 2, stringRepresentation: "2", location: L(2)))
+    XCTAssertEqual(
+      tokenizer.tokens[8] as? Operator,
+        Operator(stringRepresentation: "+", location: L(2)))
+    XCTAssertEqual(
+      tokenizer.tokens[9] as? IntegerLiteral,
+        IntegerLiteral(
+          value: 3, stringRepresentation: "3", location: L(2)))
+    XCTAssertEqual(
+      tokenizer.tokens[10] as? Punctuation,
+        Punctuation(
+          value: ")", stringRepresentation: ")", location: L(2)))
+    XCTAssertEqual(
+      tokenizer.tokens[11] as? Punctuation,
+        Punctuation(
+          value: "}", stringRepresentation: "}", location: L(3)))
   }
 
   func test_b_parsing_with_line_comment() throws {
@@ -115,3 +152,5 @@ final class TokenizerTests: XCTestCase {
     }
   }
 }
+
+// swiftlint:enable function_body_length
