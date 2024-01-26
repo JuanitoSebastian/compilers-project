@@ -17,7 +17,7 @@ let package = Package(
     .testTarget(
       name: "swiftcompilerTests",
       dependencies: ["swiftcompiler"],
-      exclude: ["main.swift", "Models", "Utils", "Tokenizer.swift"],
+      exclude: ["main.swift", "Models", "Utils", "Services"],
       sources: ["Tests"])
   ]
 )
