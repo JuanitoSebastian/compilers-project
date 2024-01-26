@@ -1,7 +1,8 @@
-struct LiteralExpression<Element> where Element: LitelExpressionRawValue {
+struct LiteralExpression<Element>: Expression where Element: LitelExpressionValue {
+  let type: ExpressionType = .literal
   let value: Element
 }
 
-protocol LitelExpressionRawValue { }
-extension Int: LitelExpressionRawValue { }
-extension Bool: LitelExpressionRawValue { }
+protocol LitelExpressionValue {}
+extension Int: LitelExpressionValue {}
+extension Bool: LitelExpressionValue {}

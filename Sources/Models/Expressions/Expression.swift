@@ -1,1 +1,3 @@
-protocol Expression {}
+protocol Expression {
+  var type: ExpressionType { get }
+}
