@@ -1,9 +1,13 @@
 import XCTest
-
-// swiftlint:disable:next identifier_name
-let L = Location(file: nil, position: nil)
+import SwiftSyntax
+import SwiftSyntaxMacros
 
 @testable import swiftcompiler
+
+// swiftlint:disable:next identifier_name
+func L(_ line: Int) -> Location {
+  return Location(file: nil, position: nil, line: line)
+}
 
 final class TokenizerTests: XCTestCase {
   func test_a_parsing_with_identifiers_and_integers() throws {
@@ -17,15 +21,15 @@ final class TokenizerTests: XCTestCase {
     XCTAssertEqual(
       tokenizer.tokens[0] as? Identifier,
         Identifier(
-          value: "if", stringRepresentation: "if", location: L))
+          value: "if", stringRepresentation: "if", location: L(0)))
     XCTAssertEqual(
       tokenizer.tokens[1] as? IntegerLiteral,
         IntegerLiteral(
-          value: 3, stringRepresentation: "3", location: L))
+          value: 3, stringRepresentation: "3", location: L(0)))
     XCTAssertEqual(
       tokenizer.tokens[2] as? Identifier,
         Identifier(
-          value: "while", stringRepresentation: "while", location: L))
+          value: "while", stringRepresentation: "while", location: L(1)))
   }
 
   func test_b_parsing_with_line_comment() throws {
@@ -40,15 +44,15 @@ final class TokenizerTests: XCTestCase {
     XCTAssertEqual(
       tokenizer.tokens[0] as? Identifier,
         Identifier(
-          value: "if", stringRepresentation: "if", location: L))
+          value: "if", stringRepresentation: "if", location: L(0)))
     XCTAssertEqual(
       tokenizer.tokens[1] as? IntegerLiteral,
         IntegerLiteral(
-          value: 3, stringRepresentation: "3", location: L))
+          value: 3, stringRepresentation: "3", location: L(0)))
     XCTAssertEqual(
       tokenizer.tokens[2] as? Identifier,
         Identifier(
-          value: "for", stringRepresentation: "for", location: L))
+          value: "for", stringRepresentation: "for", location: L(2)))
   }
 
   func test_c_parsing_with_punctuation() throws {
@@ -62,23 +66,23 @@ final class TokenizerTests: XCTestCase {
     XCTAssertEqual(
       tokenizer.tokens[2] as? Punctuation,
         Punctuation(
-          value: "(", stringRepresentation: "(", location: L))
+          value: "(", stringRepresentation: "(", location: L(0)))
     XCTAssertEqual(
       tokenizer.tokens[3] as? Punctuation,
         Punctuation(
-          value: ")", stringRepresentation: ")", location: L))
+          value: ")", stringRepresentation: ")", location: L(0)))
     XCTAssertEqual(
       tokenizer.tokens[4] as? Punctuation,
         Punctuation(
-          value: "{", stringRepresentation: "{", location: L))
+          value: "{", stringRepresentation: "{", location: L(1)))
     XCTAssertEqual(
       tokenizer.tokens[5] as? IntegerLiteral,
         IntegerLiteral(
-          value: 2, stringRepresentation: "2", location: L))
+          value: 2, stringRepresentation: "2", location: L(1)))
     XCTAssertEqual(
       tokenizer.tokens[6] as? Punctuation,
         Punctuation(
-          value: "}", stringRepresentation: "}", location: L))
+          value: "}", stringRepresentation: "}", location: L(1)))
   }
 
   func test_d_parse_and_check_token_position() throws {

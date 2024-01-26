@@ -13,11 +13,13 @@ struct Tokenizer {
 
   mutating func tokenize() {
     var positionIndex = input.startIndex
+    var line = 0
     while positionIndex < input.endIndex {
       if let token = match(
-        input[positionIndex...], positionIndex: positionIndex)
+        input[positionIndex...], positionIndex: positionIndex, line: line)
       {
-        if token.type != .lineComment { tokens.append(token) }
+        if token.type != .lineComment && token.type != .newLine { tokens.append(token) }
+        if token.type == .lineComment || token.type == .newLine { line += 1 }
         positionIndex = input.index(positionIndex, offsetBy: token.stringRepresentation.count)
       } else {
         positionIndex = input.index(after: positionIndex)
@@ -25,7 +27,7 @@ struct Tokenizer {
     }
   }
 
-  func match(_ input: Substring, positionIndex: Substring.Index) -> Token? {
+  func match(_ input: Substring, positionIndex: Substring.Index, line: Int) -> Token? {
     for tokenType in TokenType.allCases {
       if let matcher = RegexMatcher(tokenType.regex, input: String(input)) {
         let range = Range<String.Index>(
@@ -37,24 +39,28 @@ struct Tokenizer {
         case .integerLiteral:
           return IntegerLiteral(
             stringRepresentation: matcher.matchedString,
-            location: Location(file: file, position: range)
+            location: Location(file: file, position: range, line: line)
           )
         case .identifier:
           return Identifier(
             value: matcher.matchedString, stringRepresentation: matcher.matchedString,
-            location: Location(file: file, position: range))
+            location: Location(file: file, position: range, line: line))
         case .lineComment:
           return LineComment(
             value: matcher.matchedString, stringRepresentation: matcher.matchedString,
-            location: Location(file: file, position: range))
+            location: Location(file: file, position: range, line: line))
         case .op:
           return Operator(
             stringRepresentation: matcher.matchedString,
-            location: Location(file: file, position: range))
+            location: Location(file: file, position: range, line: line))
         case .punctuation:
           return Punctuation(
             value: matcher.matchedString, stringRepresentation: matcher.matchedString,
-            location: Location(file: file, position: range))
+            location: Location(file: file, position: range, line: line))
+        case .newLine:
+          return NewLine(
+            stringRepresentation: matcher.matchedString,
+            location: Location(file: file, position: range, line: line))
         }
       }
     }

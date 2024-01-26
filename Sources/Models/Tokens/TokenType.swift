@@ -4,6 +4,7 @@ enum TokenType: CaseIterable {
   case op
   case identifier
   case punctuation
+  case newLine
 
   var regex: String {
     switch self {
@@ -17,6 +18,8 @@ enum TokenType: CaseIterable {
       return IDENTIFIER_REGEX
     case .lineComment:
       return LINE_COMMENT_REGEX
+    case .newLine:
+      return NEWLINE_REGEX
     }
   }
 }
@@ -26,3 +29,4 @@ let IDENTIFIER_REGEX = "^[a-zA-Z][a-zA-Z0-9]*"
 let OPERATOR_REGEX = "^={1,2}|^[-+*/]$"
 let LINE_COMMENT_REGEX = "^//.*\n"
 let PUNCTUATION_REGEX = "^[(|)|{|}|[|]]"
+let NEWLINE_REGEX = "^\n"
