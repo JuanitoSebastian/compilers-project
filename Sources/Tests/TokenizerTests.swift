@@ -67,7 +67,7 @@ final class TokenizerTests: XCTestCase {
           value: "}", stringRepresentation: "}", location: L(3)))
   }
 
-  func test_b_parsing_with_line_comment() throws {
+  func test_b_line_comments_are_ignored() throws {
     let input = """
     if  3
     // while
@@ -90,50 +90,44 @@ final class TokenizerTests: XCTestCase {
           value: "for", stringRepresentation: "for", location: L(2)))
   }
 
-  func test_c_parsing_with_punctuation() throws {
+  func test_c_integer_literals_tokenized_correctly() throws {
     let input = """
-    if  3 ( )
-    { 2 }
+    1 2 400958 -1
+    648
     """
     var tokenizer = Tokenizer(input: input)
     tokenizer.tokenize()
-    XCTAssertEqual(tokenizer.tokens.count, 7)
-    XCTAssertEqual(
-      tokenizer.tokens[2] as? Punctuation,
-        Punctuation(
-          value: "(", stringRepresentation: "(", location: L(0)))
-    XCTAssertEqual(
-      tokenizer.tokens[3] as? Punctuation,
-        Punctuation(
-          value: ")", stringRepresentation: ")", location: L(0)))
-    XCTAssertEqual(
-      tokenizer.tokens[4] as? Punctuation,
-        Punctuation(
-          value: "{", stringRepresentation: "{", location: L(1)))
-    XCTAssertEqual(
-      tokenizer.tokens[5] as? IntegerLiteral,
-        IntegerLiteral(
-          value: 2, stringRepresentation: "2", location: L(1)))
-    XCTAssertEqual(
-      tokenizer.tokens[6] as? Punctuation,
-        Punctuation(
-          value: "}", stringRepresentation: "}", location: L(1)))
-  }
-
-  func test_d_parse_and_check_token_position() throws {
-    let input = "int hundred = 100"
-    let expected = ["int", "hundred", "=", "100"]
-    var tokenizer = Tokenizer(input: input)
-    tokenizer.tokenize()
-    XCTAssertEqual(tokenizer.tokens.count, expected.count)
+    let correctStrings = ["1", "2", "400958", "-", "1", "648"]
+    let correctTypes = [
+      TokenType.integerLiteral,
+      TokenType.integerLiteral,
+      TokenType.integerLiteral,
+      TokenType.op,
+      TokenType.integerLiteral,
+      TokenType.integerLiteral
+    ]
     tokenizer.tokens.enumerated().forEach( { (index, token) in
-      XCTAssertEqual(token.stringRepresentation, expected[index])
+      XCTAssertEqual(token.stringRepresentation, correctStrings[index])
+      XCTAssertEqual(token.type, correctTypes[index])
     })
   }
 
-  func test_e_parse_if() throws {
-    let input = "if (a == 3) { b = 4 }"
-    let expected = ["if", "(", "a", "==", "3", ")", "{", "b", "=", "4", "}"]
+  func test_d_operators_tokenized_correctly() throws {
+    let input = """
+    + - * / % = == != < > <= >=
+    """
+    var tokenizer = Tokenizer(input: input)
+    tokenizer.tokenize()
+    let correctStrings = ["+", "-", "*", "/", "%", "=", "==", "!=", "<", ">", "<=", ">="]
+    tokenizer.tokens.enumerated().forEach( { (index, token) in
+      XCTAssertEqual(token.stringRepresentation, correctStrings[index])
+      XCTAssertEqual(token.type, TokenType.op)
+    })
+  }
+
+  func test_e_parse_and_check_token_position() throws {
+    let input = "int hundred = 100"
+    let expected = ["int", "hundred", "=", "100"]
     var tokenizer = Tokenizer(input: input)
     tokenizer.tokenize()
     XCTAssertEqual(tokenizer.tokens.count, expected.count)
