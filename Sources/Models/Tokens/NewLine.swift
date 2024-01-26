@@ -6,4 +6,8 @@ struct NewLine: Token, Equatable {
   var description: String {
     return "NewLine(\(stringRepresentation))"
   }
+
+  static func == (lhs: NewLine, rhs: NewLine) -> Bool {
+    return lhs.stringRepresentation == rhs.stringRepresentation && lhs.location == rhs.location
+  }
 }

@@ -10,4 +10,8 @@ struct Identifier: Token, Equatable {
   var description: String {
     return "Identifier(value: \(value), location: \(location))"
   }
+
+  static func == (lhs: Identifier, rhs: Identifier) -> Bool {
+    return lhs.value == rhs.value && lhs.location == rhs.location
+  }
 }

@@ -9,4 +9,8 @@ struct Operator: Token, Equatable {
   var description: String {
     return "Operator(stringRepresentation: \(stringRepresentation), location: \(location))"
   }
+
+  static func == (lhs: Operator, rhs: Operator) -> Bool {
+    return lhs.stringRepresentation == rhs.stringRepresentation && lhs.location == rhs.location
+  }
 }

@@ -9,4 +9,8 @@ struct Punctuation: Token, Equatable {
   var description: String {
     return "Punctuation(value: \(value))"
   }
+
+  static func == (lhs: Punctuation, rhs: Punctuation) -> Bool {
+    return lhs.value == rhs.value && lhs.location == rhs.location
+  }
 }
