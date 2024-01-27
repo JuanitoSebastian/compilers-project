@@ -6,33 +6,37 @@ struct Parser {
     return position < tokens.count ? tokens[position] : nil
   }
 
-  mutating func consume(_ expected: String?...) -> Token? {
+  mutating func consume(_ expected: String...) -> Token? {
     guard let token = peek() else {
       return nil
     }
 
-    if !expected.contains(token.stringRepresentation) {
-      fatalError("Expected \(expected) at \(token.location), got \(token.stringRepresentation)")
+    if expected.count > 0 && !expected.contains(token.value) {
+      fatalError("Expected \(expected) at \(token.location), got \(token.value)")
     }
 
     position += 1
     return token
   }
 
-  func parseIntLiteral() -> LiteralExpression<Int>? {
-    guard let token = peek() as? IntegerLiteralToken else {
+  mutating func parseIntLiteral() -> LiteralExpression<Int>? {
+    guard let token = consume() else {
       return nil
     }
 
-    if token.type != .integerLiteral {
-      fatalError("Expected integer literal at \(token.location), got \(token.stringRepresentation)")
+    guard token.type == .integerLiteral, let value = Int(token.value) else {
+      fatalError("Expected integer literal at \(token.location), got \(token.value)")
     }
 
-    return LiteralExpression(value: token.value)
+    return LiteralExpression<Int>(value: Int(value))
   }
 
-  func parseBinaryOp() -> BinaryOpExpression? {
+  mutating func parseExpression() -> (any Expression)? {
     guard let left = parseIntLiteral() else {
+      return nil
+    }
+
+    guard let op = consume("+", "-") else {
       return nil
     }
 
@@ -40,6 +44,6 @@ struct Parser {
       return nil
     }
 
-    return nil
+    return BinaryOpExpression(left: left, op: op.value, right: right)
   }
 }
