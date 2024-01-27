@@ -36,7 +36,7 @@ struct Parser {
       return nil
     }
 
-    guard let op = consume("+", "-") else {
+    guard let op = consume("+", "-", "*") else {
       return nil
     }
 
