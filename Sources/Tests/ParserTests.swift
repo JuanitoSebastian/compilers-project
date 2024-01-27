@@ -10,7 +10,7 @@ final class ParserTests: XCTestCase {
     let expression = parser.parseExpression()
     guard
       let binaryOpExpression = expression
-        as? BinaryOpExpression<LiteralExpression<Int>, LiteralExpression<Int>>
+        as? BinaryOpExpression
     else {
       XCTFail("Expected BinaryOpExpression, got \(String(describing: expression))")
       return
@@ -19,5 +19,6 @@ final class ParserTests: XCTestCase {
       binaryOpExpression,
       BinaryOpExpression(
         left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)))
+    print(binaryOpExpression)
   }
 }

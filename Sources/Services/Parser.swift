@@ -75,12 +75,6 @@ struct Parser {
       return nil
     }
 
-    if let leftLiteral = left as? LiteralExpression<Int>,
-      let rightLiteral = right as? LiteralExpression<Int>
-    {
-      return BinaryOpExpression(left: leftLiteral, op: op.value, right: rightLiteral)
-    }
-
-    return nil
+    return BinaryOpExpression(left: left, op: op.value, right: right)
   }
 }
