@@ -12,89 +12,124 @@ func L(_ line: Int) -> Location {
 final class TokenizerTests: XCTestCase {
   func test_a_tokens_recognized_correctly() throws {
     let input = """
-    if  3
-    while {
-      var = (2 + 3)
-    }
-    """
+      if  3
+      while {
+        var = (2 + 3)
+      }
+      """
     var tokenizer = Tokenizer(input: input)
     tokenizer.tokenize()
     XCTAssertEqual(tokenizer.tokens.count, 12)
     XCTAssertEqual(
-      tokenizer.tokens[0] as? IdentifierToken,
-        IdentifierToken(
-          value: "if", stringRepresentation: "if", location: L(0)))
+      tokenizer.tokens[0],
+      Token(
+        type: TokenType.identifier,
+        value: "if",
+        location: L(0)))
     XCTAssertEqual(
-      tokenizer.tokens[1] as? IntegerLiteralToken,
-        IntegerLiteralToken(
-          value: 3, stringRepresentation: "3", location: L(0)))
+      tokenizer.tokens[1],
+      Token(
+        type: TokenType.integerLiteral,
+        value: "3",
+        location: L(0)))
     XCTAssertEqual(
-      tokenizer.tokens[2] as? IdentifierToken,
-        IdentifierToken(
-          value: "while", stringRepresentation: "while", location: L(1)))
-    XCTAssertEqual(tokenizer.tokens[3] as? PunctuationToken,
-      PunctuationToken(
-        value: "{", stringRepresentation: "{", location: L(1)))
+      tokenizer.tokens[2],
+      Token(
+        type: TokenType.identifier,
+        value: "while",
+        location: L(1)))
     XCTAssertEqual(
-      tokenizer.tokens[4] as? IdentifierToken,
-        IdentifierToken(
-          value: "var", stringRepresentation: "var", location: L(2)))
+      tokenizer.tokens[3],
+      Token(
+        type: TokenType.punctuation,
+        value: "{",
+        location: L(1)))
     XCTAssertEqual(
-      tokenizer.tokens[5] as? OperatorToken,
-        OperatorToken(stringRepresentation: "=", location: L(2)))
+      tokenizer.tokens[4],
+      Token(
+        type: TokenType.identifier,
+        value: "var",
+        location: L(2)))
     XCTAssertEqual(
-      tokenizer.tokens[6] as? PunctuationToken,
-        PunctuationToken(
-          value: "(", stringRepresentation: "(", location: L(2)))
+      tokenizer.tokens[5],
+      Token(
+        type: TokenType.op,
+        value: "=",
+        location: L(2)))
     XCTAssertEqual(
-      tokenizer.tokens[7] as? IntegerLiteralToken,
-        IntegerLiteralToken(
-          value: 2, stringRepresentation: "2", location: L(2)))
+      tokenizer.tokens[6],
+      Token(
+        type: TokenType.punctuation,
+        value: "(",
+        location: L(2)))
+
     XCTAssertEqual(
-      tokenizer.tokens[8] as? OperatorToken,
-        OperatorToken(stringRepresentation: "+", location: L(2)))
+      tokenizer.tokens[7],
+      Token(
+        type: TokenType.integerLiteral,
+        value: "2",
+        location: L(2)))
     XCTAssertEqual(
-      tokenizer.tokens[9] as? IntegerLiteralToken,
-        IntegerLiteralToken(
-          value: 3, stringRepresentation: "3", location: L(2)))
+      tokenizer.tokens[8],
+      Token(
+        type: TokenType.op,
+        value: "+",
+        location: L(2)))
     XCTAssertEqual(
-      tokenizer.tokens[10] as? PunctuationToken,
-        PunctuationToken(
-          value: ")", stringRepresentation: ")", location: L(2)))
+      tokenizer.tokens[9],
+      Token(
+        type: TokenType.integerLiteral,
+        value: "3",
+        location: L(2)))
     XCTAssertEqual(
-      tokenizer.tokens[11] as? PunctuationToken,
-        PunctuationToken(
-          value: "}", stringRepresentation: "}", location: L(3)))
+      tokenizer.tokens[10],
+      Token(
+        type: TokenType.punctuation,
+        value: ")",
+        location: L(2)))
+    XCTAssertEqual(
+      tokenizer.tokens[11],
+      Token(
+        type: TokenType.punctuation,
+        value: "}",
+        location: L(3)))
   }
 
   func test_b_line_comments_are_ignored() throws {
     let input = """
-    if  3
-    // while
-    for
-    """
+      if  3
+      // while
+      for
+      """
     var tokenizer = Tokenizer(input: input)
     tokenizer.tokenize()
     XCTAssertEqual(tokenizer.tokens.count, 3)
     XCTAssertEqual(
-      tokenizer.tokens[0] as? IdentifierToken,
-        IdentifierToken(
-          value: "if", stringRepresentation: "if", location: L(0)))
+      tokenizer.tokens[0],
+      Token(
+        type: TokenType.identifier,
+        value: "if",
+        location: L(0)))
     XCTAssertEqual(
-      tokenizer.tokens[1] as? IntegerLiteralToken,
-        IntegerLiteralToken(
-          value: 3, stringRepresentation: "3", location: L(0)))
+      tokenizer.tokens[1],
+      Token(
+        type: TokenType.integerLiteral,
+        value: "3",
+        location: L(0)))
     XCTAssertEqual(
-      tokenizer.tokens[2] as? IdentifierToken,
-        IdentifierToken(
-          value: "for", stringRepresentation: "for", location: L(2)))
+      tokenizer.tokens[2],
+      Token(
+        type: TokenType.identifier,
+        value: "for",
+        location: L(2)))
+
   }
 
   func test_c_integer_literals_tokenized_correctly() throws {
     let input = """
-    1 2 400958 -1
-    648
-    """
+      1 2 400958 -1
+      648
+      """
     var tokenizer = Tokenizer(input: input)
     tokenizer.tokenize()
     let correctStrings = ["1", "2", "400958", "-", "1", "648"]
@@ -106,21 +141,21 @@ final class TokenizerTests: XCTestCase {
       TokenType.integerLiteral,
       TokenType.integerLiteral
     ]
-    tokenizer.tokens.enumerated().forEach( { (index, token) in
-      XCTAssertEqual(token.stringRepresentation, correctStrings[index])
+    tokenizer.tokens.enumerated().forEach({ (index, token) in
+      XCTAssertEqual(token.value, correctStrings[index])
       XCTAssertEqual(token.type, correctTypes[index])
     })
   }
 
   func test_d_OperatorTokens_tokenized_correctly() throws {
     let input = """
-    + - * / % = == != < > <= >=
-    """
+      + - * / % = == != < > <= >=
+      """
     var tokenizer = Tokenizer(input: input)
     tokenizer.tokenize()
     let correctStrings = ["+", "-", "*", "/", "%", "=", "==", "!=", "<", ">", "<=", ">="]
-    tokenizer.tokens.enumerated().forEach( { (index, token) in
-      XCTAssertEqual(token.stringRepresentation, correctStrings[index])
+    tokenizer.tokens.enumerated().forEach({ (index, token) in
+      XCTAssertEqual(token.value, correctStrings[index])
       XCTAssertEqual(token.type, TokenType.op)
     })
   }
@@ -131,8 +166,8 @@ final class TokenizerTests: XCTestCase {
     var tokenizer = Tokenizer(input: input)
     tokenizer.tokenize()
     XCTAssertEqual(tokenizer.tokens.count, expected.count)
-    tokenizer.tokens.enumerated().forEach( { (index, token) in
-      XCTAssertEqual(token.stringRepresentation, expected[index])
+    tokenizer.tokens.enumerated().forEach({ (index, token) in
+      XCTAssertEqual(token.value, expected[index])
     })
   }
 
@@ -142,7 +177,7 @@ final class TokenizerTests: XCTestCase {
     tokenizer.tokenize()
     for token in tokenizer.tokens {
       let range = token.location.position!
-      XCTAssertEqual(token.stringRepresentation, String(input[range]))
+      XCTAssertEqual(token.value, String(input[range]))
     }
   }
 }

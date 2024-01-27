@@ -1,6 +1,9 @@
-protocol Token: CustomStringConvertible {
-  var type: TokenType { get }
-  var stringRepresentation: String { get }
-  var location: Location { get }
-  var description: String { get }
+struct Token: CustomStringConvertible, Equatable {
+  let type: TokenType
+  let value: String
+  let location: Location
+
+  var description: String {
+    return "Token (\(type)): \(value)"
+  }
 }

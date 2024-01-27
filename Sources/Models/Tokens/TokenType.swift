@@ -1,4 +1,4 @@
-enum TokenType: CaseIterable {
+enum TokenType: CaseIterable, CustomStringConvertible {
   case integerLiteral
   case lineComment
   case op
@@ -20,6 +20,23 @@ enum TokenType: CaseIterable {
       return LINE_COMMENT_REGEX
     case .newLine:
       return NEWLINE_REGEX
+    }
+  }
+
+  var description: String {
+    switch self {
+    case .integerLiteral:
+      return "integer literal"
+    case .op:
+      return "operator"
+    case .punctuation:
+      return "punctuation"
+    case .identifier:
+      return "identifier"
+    case .lineComment:
+      return "line comment"
+    case .newLine:
+      return "new line"
     }
   }
 }

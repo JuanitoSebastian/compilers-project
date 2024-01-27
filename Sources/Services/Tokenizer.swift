@@ -20,7 +20,7 @@ struct Tokenizer {
       {
         if token.type != .lineComment && token.type != .newLine { tokens.append(token) }
         if token.type == .lineComment || token.type == .newLine { line += 1 }
-        positionIndex = input.index(positionIndex, offsetBy: token.stringRepresentation.count)
+        positionIndex = input.index(positionIndex, offsetBy: token.value.count)
       } else {
         positionIndex = input.index(after: positionIndex)
       }
@@ -35,33 +35,11 @@ struct Tokenizer {
             lower: positionIndex,
             upper: input.base.index(positionIndex, offsetBy: matcher.matchedString.count)
           ))
-        switch tokenType {
-        case .integerLiteral:
-          return IntegerLiteralToken(
-            stringRepresentation: matcher.matchedString,
-            location: Location(file: file, position: range, line: line)
-          )
-        case .identifier:
-          return IdentifierToken(
-            value: matcher.matchedString, stringRepresentation: matcher.matchedString,
-            location: Location(file: file, position: range, line: line))
-        case .lineComment:
-          return LineCommentToken(
-            value: matcher.matchedString, stringRepresentation: matcher.matchedString,
-            location: Location(file: file, position: range, line: line))
-        case .op:
-          return OperatorToken(
-            stringRepresentation: matcher.matchedString,
-            location: Location(file: file, position: range, line: line))
-        case .punctuation:
-          return PunctuationToken(
-            value: matcher.matchedString, stringRepresentation: matcher.matchedString,
-            location: Location(file: file, position: range, line: line))
-        case .newLine:
-          return NewLineToken(
-            stringRepresentation: matcher.matchedString,
-            location: Location(file: file, position: range, line: line))
-        }
+        return Token(
+          type: tokenType,
+          value: matcher.matchedString,
+          location: Location(file: file, position: range, line: line)
+        )
       }
     }
     return nil
