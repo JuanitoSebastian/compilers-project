@@ -23,5 +23,7 @@ jobs:
           swift-version: "5.9.2"
     - name: Build
       run: swift build
+    - name: Lint
+      run: swift run swiftlint
     - name: Run tests
       run: swift test
