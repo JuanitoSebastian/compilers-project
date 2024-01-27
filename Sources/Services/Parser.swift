@@ -20,7 +20,7 @@ struct Parser {
   }
 
   mutating func parseIntLiteral() -> LiteralExpression<Int>? {
-    guard let token = consume() else {
+    guard let token = peek() else {
       return nil
     }
 
@@ -28,11 +28,42 @@ struct Parser {
       fatalError("Expected integer literal at \(token.location), got \(token.value)")
     }
 
+    _ = consume()
+
     return LiteralExpression<Int>(value: value)
   }
 
+  mutating func parseIdentifier() -> IdentifierExpression? {
+    guard let token = peek() else {
+      return nil
+    }
+
+    guard token.type == .identifier else {
+      fatalError("Expected identifier at \(token.location), got \(token.value)")
+    }
+
+    _ = consume()
+
+    return IdentifierExpression(value: token.value)
+  }
+
+  mutating func parseTerm() -> (any Expression)? {
+    guard let token = peek() else {
+      return nil
+    }
+
+    switch token.type {
+    case .integerLiteral:
+      return parseIntLiteral()
+    case .identifier:
+      return parseIdentifier()
+    default:
+      fatalError("Not implemented")
+    }
+  }
+
   mutating func parseExpression() -> (any Expression)? {
-    guard let left = parseIntLiteral() else {
+    guard let left = parseTerm() else {
       return nil
     }
 
@@ -40,10 +71,16 @@ struct Parser {
       return nil
     }
 
-    guard let right = parseIntLiteral() else {
+    guard let right = parseTerm() else {
       return nil
     }
 
-    return BinaryOpExpression(left: left, op: op.value, right: right)
+    if let leftLiteral = left as? LiteralExpression<Int>,
+      let rightLiteral = right as? LiteralExpression<Int>
+    {
+      return BinaryOpExpression(left: leftLiteral, op: op.value, right: rightLiteral)
+    }
+
+    return nil
   }
 }
