@@ -28,7 +28,7 @@ struct Parser {
       fatalError("Expected integer literal at \(token.location), got \(token.value)")
     }
 
-    return LiteralExpression<Int>(value: Int(value))
+    return LiteralExpression<Int>(value: value)
   }
 
   mutating func parseExpression() -> (any Expression)? {
