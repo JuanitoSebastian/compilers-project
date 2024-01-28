@@ -12,6 +12,7 @@ struct Parser {
     }
 
     if expected.count > 0 && !expected.contains(token.value) {
+      // TODO: Create a custom error type
       fatalError("Expected \(expected) at \(token.location), got \(token.value)")
     }
 
