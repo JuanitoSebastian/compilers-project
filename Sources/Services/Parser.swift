@@ -64,18 +64,19 @@ struct Parser {
   }
 
   mutating func parseExpression() -> (any Expression)? {
-    guard let left = parseTerm() else {
+    guard var left = parseTerm() else {
       return nil
     }
 
-    guard let op = consume("+", "-", "*") else {
-      return nil
+    while let op = peek(), ["+", "-", "*"].contains(op.value) {
+      _ = consume()
+      guard let right = parseTerm() else {
+        return nil
+      }
+
+      left = BinaryOpExpression(left: left, op: op.value, right: right)
     }
 
-    guard let right = parseTerm() else {
-      return nil
-    }
-
-    return BinaryOpExpression(left: left, op: op.value, right: right)
+    return left
   }
 }
