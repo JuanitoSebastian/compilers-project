@@ -47,7 +47,7 @@ struct Parser {
     return IdentifierExpression(value: token.value)
   }
 
-  mutating func parseTerm() throws -> (any Expression)? {
+  mutating func parseFactor() throws -> (any Expression)? {
     guard let token = peek() else {
       return nil
     }
@@ -60,6 +60,23 @@ struct Parser {
     default:
       fatalError("Not implemented")
     }
+  }
+
+  mutating func parseTerm() throws -> (any Expression)? {
+    guard var left = try parseFactor() else {
+      return nil
+    }
+
+    while let op = peek(), ["*", "/"].contains(op.value) {
+      _ = try? consume()
+      guard let right = try parseFactor() else {
+        return nil
+      }
+
+      left = BinaryOpExpression(left: left, op: op.value, right: right)
+    }
+
+    return left
   }
 
   mutating func parseExpression() throws -> (any Expression)? {
