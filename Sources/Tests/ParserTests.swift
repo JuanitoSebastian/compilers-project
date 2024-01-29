@@ -7,7 +7,7 @@ final class ParserTests: XCTestCase {
     var tokenizer = Tokenizer(input: "1 + 2")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
-    let expression = try parser.parseExpression()
+    let expression = try parser.parse()
     guard
       let binaryOpExpression = expression
         as? BinaryOpExpression
@@ -25,7 +25,7 @@ final class ParserTests: XCTestCase {
     var tokenizer = Tokenizer(input: "1 + a")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
-    let expression = try parser.parseExpression()
+    let expression = try parser.parse()
     guard
       let binaryOpExpression = expression
         as? BinaryOpExpression
@@ -43,7 +43,7 @@ final class ParserTests: XCTestCase {
     var tokenizer = Tokenizer(input: "10 + a - 3")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
-    let expression = try parser.parseExpression()
+    let expression = try parser.parse()
     guard
       let binaryOpExpression = expression
         as? BinaryOpExpression
@@ -64,7 +64,7 @@ final class ParserTests: XCTestCase {
     var tokenizer = Tokenizer(input: "2 - 10 * 2")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
-    let expression = try parser.parseExpression()
+    let expression = try parser.parse()
     guard
       let binaryOpExpression = expression
         as? BinaryOpExpression
@@ -85,7 +85,7 @@ final class ParserTests: XCTestCase {
     var tokenizer = Tokenizer(input: "(2 - 10) * 2")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
-    let expression = try parser.parseExpression()
+    let expression = try parser.parse()
     guard
       let binaryOpExpression = expression
         as? BinaryOpExpression
@@ -100,5 +100,17 @@ final class ParserTests: XCTestCase {
           left: LiteralExpression(value: 2), op: "-", right: LiteralExpression(value: 10)),
         op: "*",
         right: LiteralExpression(value: 2)))
+  }
+
+  func test_f_extra_token_error() throws {
+    var tokenizer = Tokenizer(input: "1 + 2 +")
+    tokenizer.tokenize()
+    var parser = Parser(tokens: tokenizer.tokens)
+    XCTAssertThrowsError(try parser.parse()) { error in
+      XCTAssertEqual(
+        error as? ParserError,
+        ParserError.invalidInputError(
+          token: Token(type: .op, value: "+", location: L(0))))
+    }
   }
 }

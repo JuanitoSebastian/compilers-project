@@ -6,7 +6,15 @@ struct Parser {
     return position < tokens.count ? tokens[position] : nil
   }
 
-  mutating func consume(_ expected: String...) throws -> Token? {
+  mutating func parse() throws -> (any Expression)? {
+    let expression = try parseExpression()
+    guard position == tokens.count else {
+      throw ParserError.invalidInputError(token: tokens[position])
+    }
+    return expression
+  }
+
+  private mutating func consume(_ expected: String...) throws -> Token? {
     guard let token = peek() else {
       return nil
     }
@@ -19,7 +27,7 @@ struct Parser {
     return token
   }
 
-  mutating func parseIntLiteral() throws -> LiteralExpression<Int>? {
+  private mutating func parseIntLiteral() throws -> LiteralExpression<Int>? {
     guard let token = peek() else {
       return nil
     }
@@ -33,7 +41,7 @@ struct Parser {
     return LiteralExpression<Int>(value: value)
   }
 
-  mutating func parseIdentifier() throws -> IdentifierExpression? {
+  private mutating func parseIdentifier() throws -> IdentifierExpression? {
     guard let token = peek() else {
       return nil
     }
@@ -47,7 +55,7 @@ struct Parser {
     return IdentifierExpression(value: token.value)
   }
 
-  mutating func parseFactor() throws -> (any Expression)? {
+  private mutating func parseFactor() throws -> (any Expression)? {
     guard let token = peek() else {
       return nil
     }
@@ -66,7 +74,7 @@ struct Parser {
     }
   }
 
-  mutating func parseParenthesized() throws -> (any Expression)? {
+  private mutating func parseParenthesized() throws -> (any Expression)? {
     _ = try consume("(")
     guard let expression = try parseExpression() else {
       return nil
@@ -75,7 +83,7 @@ struct Parser {
     return expression
   }
 
-  mutating func parseTerm() throws -> (any Expression)? {
+  private mutating func parseTerm() throws -> (any Expression)? {
     guard var left = try parseFactor() else {
       return nil
     }
@@ -92,7 +100,7 @@ struct Parser {
     return left
   }
 
-  mutating func parseExpression() throws -> (any Expression)? {
+  private mutating func parseExpression() throws -> (any Expression)? {
     guard var left = try parseTerm() else {
       return nil
     }
