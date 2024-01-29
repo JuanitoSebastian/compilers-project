@@ -59,4 +59,25 @@ final class ParserTests: XCTestCase {
         op: "-",
         right: LiteralExpression(value: 3)))
   }
+
+  func test_d_parse_binary_op_with_multiplication() throws {
+    var tokenizer = Tokenizer(input: "2 - 10 * 2")
+    tokenizer.tokenize()
+    var parser = Parser(tokens: tokenizer.tokens)
+    let expression = try parser.parseExpression()
+    guard
+      let binaryOpExpression = expression
+        as? BinaryOpExpression
+    else {
+      XCTFail("Expected BinaryOpExpression, got \(String(describing: expression))")
+      return
+    }
+    XCTAssertEqual(
+      binaryOpExpression,
+      BinaryOpExpression(
+        left: LiteralExpression(value: 2),
+        op: "-",
+        right: BinaryOpExpression(
+          left: LiteralExpression(value: 10), op: "*", right: LiteralExpression(value: 2))))
+  }
 }
