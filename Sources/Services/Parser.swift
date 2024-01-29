@@ -52,6 +52,10 @@ struct Parser {
       return nil
     }
 
+    if token.value == "(" {
+      return try parseParenthesized()
+    }
+
     switch token.type {
     case .integerLiteral:
       return try parseIntLiteral()
@@ -60,6 +64,15 @@ struct Parser {
     default:
       fatalError("Not implemented")
     }
+  }
+
+  mutating func parseParenthesized() throws -> (any Expression)? {
+    _ = try consume("(")
+    guard let expression = try parseExpression() else {
+      return nil
+    }
+    _ = try consume(")")
+    return expression
   }
 
   mutating func parseTerm() throws -> (any Expression)? {
