@@ -3,7 +3,7 @@ import XCTest
 @testable import swiftcompiler
 
 final class ParserTests: XCTestCase {
-  func test_a_parse_binary_op_with_ints() throws {
+  func test_a_parse_addition_with_ints() throws {
     var tokenizer = Tokenizer(input: "1 + 2")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
@@ -21,7 +21,7 @@ final class ParserTests: XCTestCase {
         left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)))
   }
 
-  func test_b_parse_binary_op_with_int_and_identifier() throws {
+  func test_b_parse_addition_with_int_and_identifier() throws {
     var tokenizer = Tokenizer(input: "1 + a")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
@@ -39,7 +39,7 @@ final class ParserTests: XCTestCase {
         left: LiteralExpression(value: 1), op: "+", right: IdentifierExpression(value: "a")))
   }
 
-  func test_c_parse_binary_op_with_nested_binary_op() throws {
+  func test_c_parse_operation_with_multiple_numbers() throws {
     var tokenizer = Tokenizer(input: "10 + a - 3")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
@@ -60,7 +60,7 @@ final class ParserTests: XCTestCase {
         right: LiteralExpression(value: 3)))
   }
 
-  func test_d_parse_binary_op_with_multiplication() throws {
+  func test_d_parse_multiplication() throws {
     var tokenizer = Tokenizer(input: "2 - 10 * 2")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
@@ -81,7 +81,7 @@ final class ParserTests: XCTestCase {
           left: LiteralExpression(value: 10), op: "*", right: LiteralExpression(value: 2))))
   }
 
-  func test_e_parse_binary_op_with_parentesis() throws {
+  func test_e_parse_parentesis() throws {
     var tokenizer = Tokenizer(input: "(2 - 10) * 2")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
