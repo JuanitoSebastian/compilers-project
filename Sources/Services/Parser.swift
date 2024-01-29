@@ -6,71 +6,70 @@ struct Parser {
     return position < tokens.count ? tokens[position] : nil
   }
 
-  mutating func consume(_ expected: String...) -> Token? {
+  mutating func consume(_ expected: String...) throws -> Token? {
     guard let token = peek() else {
       return nil
     }
 
     if expected.count > 0 && !expected.contains(token.value) {
-      // TODO: Create a custom error type
-      fatalError("Expected \(expected) at \(token.location), got \(token.value)")
+      throw ParserError.unexpectedTokenValue(token: token, expected: expected)
     }
 
     position += 1
     return token
   }
 
-  mutating func parseIntLiteral() -> LiteralExpression<Int>? {
+  mutating func parseIntLiteral() throws -> LiteralExpression<Int>? {
     guard let token = peek() else {
       return nil
     }
 
     guard token.type == .integerLiteral, let value = Int(token.value) else {
-      fatalError("Expected integer literal at \(token.location), got \(token.value)")
+      throw ParserError.unexpectedTokenType(token: token, expected: .integerLiteral)
     }
 
-    _ = consume()
+    _ = try? consume()
 
     return LiteralExpression<Int>(value: value)
   }
 
-  mutating func parseIdentifier() -> IdentifierExpression? {
+  mutating func parseIdentifier() throws -> IdentifierExpression? {
     guard let token = peek() else {
       return nil
     }
 
     guard token.type == .identifier else {
-      fatalError("Expected identifier at \(token.location), got \(token.value)")
+      throw ParserError.unexpectedTokenType(token: token, expected: .identifier)
     }
 
-    _ = consume()
+    _ = try? consume()
 
     return IdentifierExpression(value: token.value)
   }
 
-  mutating func parseTerm() -> (any Expression)? {
+  mutating func parseTerm() throws -> (any Expression)? {
     guard let token = peek() else {
       return nil
     }
 
     switch token.type {
     case .integerLiteral:
-      return parseIntLiteral()
+      return try parseIntLiteral()
     case .identifier:
-      return parseIdentifier()
+      return try parseIdentifier()
     default:
       fatalError("Not implemented")
     }
   }
 
-  mutating func parseExpression() -> (any Expression)? {
-    guard var left = parseTerm() else {
+  mutating func parseExpression() throws -> (any Expression)? {
+    guard var left = try parseTerm() else {
       return nil
     }
 
     while let op = peek(), ["+", "-", "*"].contains(op.value) {
-      _ = consume()
-      guard let right = parseTerm() else {
+      _ = try? consume()
+      guard let right = try parseTerm() else {
         return nil
       }
 

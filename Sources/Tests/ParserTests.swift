@@ -7,7 +7,7 @@ final class ParserTests: XCTestCase {
     var tokenizer = Tokenizer(input: "1 + 2")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
-    let expression = parser.parseExpression()
+    let expression = try parser.parseExpression()
     guard
       let binaryOpExpression = expression
         as? BinaryOpExpression
@@ -25,7 +25,7 @@ final class ParserTests: XCTestCase {
     var tokenizer = Tokenizer(input: "1 + a")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
-    let expression = parser.parseExpression()
+    let expression = try parser.parseExpression()
     guard
       let binaryOpExpression = expression
         as? BinaryOpExpression
@@ -43,7 +43,7 @@ final class ParserTests: XCTestCase {
     var tokenizer = Tokenizer(input: "10 + a - 3")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
-    let expression = parser.parseExpression()
+    let expression = try parser.parseExpression()
     guard
       let binaryOpExpression = expression
         as? BinaryOpExpression
