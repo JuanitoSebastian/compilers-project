@@ -67,7 +67,7 @@ struct Parser {
       return nil
     }
 
-    while let op = peek(), ["+", "-", "*"].contains(op.value) {
+    while let op = peek(), ["+", "-"].contains(op.value) {
       _ = try? consume()
       guard let right = try parseTerm() else {
         return nil
