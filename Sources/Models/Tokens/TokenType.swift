@@ -49,7 +49,7 @@ enum TokenType: CaseIterable, CustomStringConvertible {
 let INTEGER_REGEX = "^[0-9]+"
 let BOOLEAN_REGEX = "^true|^false"
 let IDENTIFIER_REGEX = "^[a-zA-Z][a-zA-Z0-9]*"
-let OPERATOR_REGEX = "^={1,2}|^<=|^>=|^!=|^[-+*/%<>]"
+let OPERATOR_REGEX = "^={1,2}|^<=|^>=|^!=|^[-+*/%<>]|^and|^or"
 let LINE_COMMENT_REGEX = "^//.*\n"
 let PUNCTUATION_REGEX = "^[(|)|{|}|[|]]"
 let NEWLINE_REGEX = "^\n"

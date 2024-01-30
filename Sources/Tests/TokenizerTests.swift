@@ -193,6 +193,18 @@ final class TokenizerTests: XCTestCase {
       XCTAssertEqual(token.value, String(input[range]))
     }
   }
+
+  func test_f_parse_binary_logical_op_tokens() throws {
+    let input = "and or"
+    let expected = ["and", "or"]
+    var tokenizer = Tokenizer(input: input)
+    tokenizer.tokenize()
+    XCTAssertEqual(tokenizer.tokens.count, expected.count)
+    tokenizer.tokens.enumerated().forEach({ (index, token) in
+      XCTAssertEqual(token.value, expected[index])
+      XCTAssertEqual(token.type, TokenType.op)
+    })
+  }
 }
 
 // swiftlint:enable function_body_length
