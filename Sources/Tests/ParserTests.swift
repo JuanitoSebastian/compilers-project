@@ -102,15 +102,15 @@ final class ParserTests: XCTestCase {
         right: LiteralExpression(value: 2)))
   }
 
-  func test_f_extra_token_error() throws {
+  func test_f_orphan_plus_sign_throws() throws {
     var tokenizer = Tokenizer(input: "1 + 2 +")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
     XCTAssertThrowsError(try parser.parse()) { error in
       XCTAssertEqual(
         error as? ParserError,
-        ParserError.invalidInputError(
-          token: Token(type: .op, value: "+", location: L(0))))
+        ParserError.noTokenFound(
+          precedingToken: Token(type: .op, value: "+", location: L(0)), expectedValues: ["+", "-"]))
     }
   }
 }

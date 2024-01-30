@@ -1,6 +1,10 @@
 struct Parser {
   let tokens: [Token]
-  var position: Int = 0
+  private var position: Int = 0
+
+  init(tokens: [Token]) {
+    self.tokens = tokens
+  }
 
   func peek() -> Token? {
     return position < tokens.count ? tokens[position] : nil
@@ -8,9 +12,6 @@ struct Parser {
 
   mutating func parse() throws -> (any Expression)? {
     let expression = try parseExpression()
-    guard position == tokens.count else {
-      throw ParserError.invalidInputError(token: tokens[position])
-    }
     return expression
   }
 
@@ -108,7 +109,7 @@ struct Parser {
     while let op = peek(), ["+", "-"].contains(op.value) {
       _ = try? consume()
       guard let right = try parseTerm() else {
-        return nil
+        throw ParserError.noTokenFound(precedingToken: op, expectedValues: ["+", "-"])
       }
 
       left = BinaryOpExpression(left: left, op: op.value, right: right)
