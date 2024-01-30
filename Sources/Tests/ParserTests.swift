@@ -110,7 +110,33 @@ final class ParserTests: XCTestCase {
       XCTAssertEqual(
         error as? ParserError,
         ParserError.noTokenFound(
-          precedingToken: Token(type: .op, value: "+", location: L(0)), expectedValues: ["+", "-"]))
+          precedingToken: Token(type: .op, value: "+", location: L(0))))
+    }
+  }
+
+  func test_g_oprhan_multiply_sign_throws() throws {
+    var tokenizer = Tokenizer(input: "1 + 2 *")
+    tokenizer.tokenize()
+    var parser = Parser(tokens: tokenizer.tokens)
+    XCTAssertThrowsError(try parser.parse()) { error in
+      XCTAssertEqual(
+        error as? ParserError,
+        ParserError.noTokenFound(
+          precedingToken: Token(type: .op, value: "*", location: L(0))))
+    }
+  }
+
+  func test_h_empty_parentheses_throws() throws {
+    var tokenizer = Tokenizer(input: "()")
+    tokenizer.tokenize()
+    var parser = Parser(tokens: tokenizer.tokens)
+    XCTAssertThrowsError(try parser.parse()) { error in
+      XCTAssertEqual(
+        error as? ParserError,
+        ParserError.unexpectedTokenType(
+          token: Token(
+            type: .punctuation, value: ")", location: L(0)),
+          expected: [TokenType.integerLiteral, TokenType.identifier]))
     }
   }
 }

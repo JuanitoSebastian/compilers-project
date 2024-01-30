@@ -34,7 +34,7 @@ struct Parser {
     }
 
     guard token.type == .integerLiteral, let value = Int(token.value) else {
-      throw ParserError.unexpectedTokenType(token: token, expected: .integerLiteral)
+      throw ParserError.unexpectedTokenType(token: token, expected: [.integerLiteral])
     }
 
     _ = try? consume()
@@ -48,7 +48,7 @@ struct Parser {
     }
 
     guard token.type == .identifier else {
-      throw ParserError.unexpectedTokenType(token: token, expected: .identifier)
+      throw ParserError.unexpectedTokenType(token: token, expected: [.identifier])
     }
 
     _ = try? consume()
@@ -71,15 +71,13 @@ struct Parser {
     case .identifier:
       return try parseIdentifier()
     default:
-      fatalError("Not implemented")
+      throw ParserError.unexpectedTokenType(token: token, expected: [.integerLiteral, .identifier])
     }
   }
 
   private mutating func parseParenthesized() throws -> (any Expression)? {
     _ = try consume("(")
-    guard let expression = try parseExpression() else {
-      return nil
-    }
+    let expression = try parseExpression()
     _ = try consume(")")
     return expression
   }
@@ -92,7 +90,7 @@ struct Parser {
     while let op = peek(), ["*", "/"].contains(op.value) {
       _ = try? consume()
       guard let right = try parseFactor() else {
-        return nil
+        throw ParserError.noTokenFound(precedingToken: op)
       }
 
       left = BinaryOpExpression(left: left, op: op.value, right: right)
@@ -109,7 +107,7 @@ struct Parser {
     while let op = peek(), ["+", "-"].contains(op.value) {
       _ = try? consume()
       guard let right = try parseTerm() else {
-        throw ParserError.noTokenFound(precedingToken: op, expectedValues: ["+", "-"])
+        throw ParserError.noTokenFound(precedingToken: op)
       }
 
       left = BinaryOpExpression(left: left, op: op.value, right: right)
