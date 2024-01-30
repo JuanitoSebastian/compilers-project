@@ -13,13 +13,13 @@ final class TokenizerTests: XCTestCase {
   func test_a_tokens_recognized_correctly() throws {
     let input = """
       if  3
-      while {
-        var = (2 + 3)
+      while true {
+        var = (2 + 3 + false)
       }
       """
     var tokenizer = Tokenizer(input: input)
     tokenizer.tokenize()
-    XCTAssertEqual(tokenizer.tokens.count, 12)
+    XCTAssertEqual(tokenizer.tokens.count, 15)
     XCTAssertEqual(
       tokenizer.tokens[0],
       Token(
@@ -41,54 +41,67 @@ final class TokenizerTests: XCTestCase {
     XCTAssertEqual(
       tokenizer.tokens[3],
       Token(
+        type: TokenType.booleanLiteral,
+        value: "true",
+        location: L(1)))
+    XCTAssertEqual(
+      tokenizer.tokens[4],
+      Token(
         type: TokenType.punctuation,
         value: "{",
         location: L(1)))
     XCTAssertEqual(
-      tokenizer.tokens[4],
+      tokenizer.tokens[5],
       Token(
         type: TokenType.identifier,
         value: "var",
         location: L(2)))
     XCTAssertEqual(
-      tokenizer.tokens[5],
+      tokenizer.tokens[6],
       Token(
         type: TokenType.op,
         value: "=",
         location: L(2)))
     XCTAssertEqual(
-      tokenizer.tokens[6],
+      tokenizer.tokens[7],
       Token(
         type: TokenType.punctuation,
         value: "(",
         location: L(2)))
 
     XCTAssertEqual(
-      tokenizer.tokens[7],
+      tokenizer.tokens[8],
       Token(
         type: TokenType.integerLiteral,
         value: "2",
         location: L(2)))
     XCTAssertEqual(
-      tokenizer.tokens[8],
+      tokenizer.tokens[9],
       Token(
         type: TokenType.op,
         value: "+",
         location: L(2)))
     XCTAssertEqual(
-      tokenizer.tokens[9],
+      tokenizer.tokens[10],
       Token(
         type: TokenType.integerLiteral,
         value: "3",
         location: L(2)))
+    XCTAssertEqual(tokenizer.tokens[11], Token(type: TokenType.op, value: "+", location: L(2)))
     XCTAssertEqual(
-      tokenizer.tokens[10],
+      tokenizer.tokens[12],
+      Token(
+        type: TokenType.booleanLiteral,
+        value: "false",
+        location: L(2)))
+    XCTAssertEqual(
+      tokenizer.tokens[13],
       Token(
         type: TokenType.punctuation,
         value: ")",
         location: L(2)))
     XCTAssertEqual(
-      tokenizer.tokens[11],
+      tokenizer.tokens[14],
       Token(
         type: TokenType.punctuation,
         value: "}",
