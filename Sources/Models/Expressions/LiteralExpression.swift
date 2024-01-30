@@ -1,4 +1,5 @@
-struct LiteralExpression<Element>: Expression, Equatable where Element: LiteralExpressionValue, Element: Equatable {
+struct LiteralExpression<Element>: Expression, Equatable
+where Element: LiteralExpressionValue, Element: Equatable {
   let type: ExpressionType = .literal
   let value: Element
 

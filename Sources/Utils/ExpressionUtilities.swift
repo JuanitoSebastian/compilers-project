@@ -5,7 +5,15 @@ func areExpressionsEqual(_ lhs: (any Expression)?, _ rhs: (any Expression)?) -> 
 
   switch lhs.type {
   case .literal:
-    return (lhs as? LiteralExpression<Int>) == (rhs as? LiteralExpression<Int>)
+    if let left = lhs as? LiteralExpression<Int>, let right = rhs as? LiteralExpression<Int> {
+      return left == right
+    } else if let left = lhs as? LiteralExpression<Bool>,
+      let right = rhs as? LiteralExpression<Bool>
+    {
+      return left == right
+    } else {
+      return false
+    }
   case .identifier:
     return (lhs as? IdentifierExpression) == (rhs as? IdentifierExpression)
   case .binaryOp:

@@ -42,6 +42,20 @@ struct Parser {
     return LiteralExpression<Int>(value: value)
   }
 
+  private mutating func parseBooleanLiteral() throws -> LiteralExpression<Bool>? {
+    guard let token = peek() else {
+      return nil
+    }
+
+    guard token.type == .booleanLiteral, let value = Bool(token.value) else {
+      throw ParserError.unexpectedTokenType(token: token, expected: [.booleanLiteral])
+    }
+
+    _ = try? consume()
+
+    return LiteralExpression<Bool>(value: value)
+  }
+
   private mutating func parseIdentifier() throws -> IdentifierExpression? {
     guard let token = peek() else {
       return nil
@@ -96,6 +110,8 @@ struct Parser {
     switch token.type {
     case .integerLiteral:
       return try parseIntLiteral()
+    case .booleanLiteral:
+      return try parseBooleanLiteral()
     case .identifier:
       return try parseIdentifier()
     default:

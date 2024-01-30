@@ -141,7 +141,7 @@ final class ParserTests: XCTestCase {
   }
 
   func test_i_parse_if_statement() throws {
-    var tokenizer = Tokenizer(input: "if 3 then 2 ")
+    var tokenizer = Tokenizer(input: "if false then 2 ")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
     let expression = try parser.parse()
@@ -155,13 +155,13 @@ final class ParserTests: XCTestCase {
     XCTAssertEqual(
       ifExpression,
       IfExpression(
-        condition: LiteralExpression(value: 3),
+        condition: LiteralExpression<Bool>(value: false),
         thenExpression: LiteralExpression<Int>(value: 2),
         elseExpression: nil))
   }
 
   func test_j_parse_if_else_statement() throws {
-    var tokenizer = Tokenizer(input: "if 3 then 2 else 1")
+    var tokenizer = Tokenizer(input: "if 3 then 2 else true")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
     let expression = try parser.parse()
@@ -177,7 +177,7 @@ final class ParserTests: XCTestCase {
       IfExpression(
         condition: LiteralExpression(value: 3),
         thenExpression: LiteralExpression<Int>(value: 2),
-        elseExpression: LiteralExpression<Int>(value: 1)))
+        elseExpression: LiteralExpression<Bool>(value: true)))
   }
 
   func test_k_parse_function_call() throws {
