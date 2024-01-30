@@ -179,4 +179,26 @@ final class ParserTests: XCTestCase {
         thenExpression: LiteralExpression<Int>(value: 2),
         elseExpression: LiteralExpression<Int>(value: 1)))
   }
+
+  func test_k_parse_function_call() throws {
+    var tokenizer = Tokenizer(input: "foo(1, 2)")
+    tokenizer.tokenize()
+    var parser = Parser(tokens: tokenizer.tokens)
+    let expression = try parser.parse()
+    guard
+      let functionCallExpression = expression
+        as? FunctionCallExpression
+    else {
+      XCTFail("Expected FunctionCallExpression, got \(String(describing: expression))")
+      return
+    }
+    XCTAssertEqual(
+      functionCallExpression,
+      FunctionCallExpression(
+        identifier: IdentifierExpression(value: "foo"),
+        arguments: [
+          LiteralExpression<Int>(value: 1),
+          LiteralExpression<Int>(value: 2)
+        ]))
+  }
 }

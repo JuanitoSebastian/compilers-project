@@ -3,4 +3,5 @@ enum ExpressionType {
   case identifier
   case binaryOp
   case ifExpression
+  case functionCall
 }

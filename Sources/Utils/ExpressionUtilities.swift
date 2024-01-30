@@ -12,5 +12,7 @@ func areExpressionsEqual(_ lhs: (any Expression)?, _ rhs: (any Expression)?) -> 
     return (lhs as? BinaryOpExpression) == (rhs as? BinaryOpExpression)
   case .ifExpression:
     return (lhs as? IfExpression) == (rhs as? IfExpression)
+  case .functionCall:
+    return (lhs as? FunctionCallExpression) == (rhs as? FunctionCallExpression)
   }
 }

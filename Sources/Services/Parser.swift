@@ -127,9 +127,26 @@ struct Parser {
     return left
   }
 
+  private mutating func parseFunctionCallParameters() throws -> [(any Expression)] {
+    var expressions: [(any Expression)] = []
+    _ = try consume("(")
+    while let token = peek(), token.value != ")" {
+      if let expression = try parseExpression() {
+        expressions.append(expression)
+      }
+    }
+    _ = try consume(")")
+    return expressions
+  }
+
   private mutating func parseExpression() throws -> (any Expression)? {
     guard var left = try parseTerm() else {
       return nil
+    }
+
+    if let next = peek(), next.value == "(", let left = left as? IdentifierExpression {
+      let parameters = try parseFunctionCallParameters()
+      return FunctionCallExpression(identifier: left, arguments: parameters)
     }
 
     while let op = peek(), ["+", "-"].contains(op.value) {
