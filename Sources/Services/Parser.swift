@@ -56,6 +56,30 @@ struct Parser {
     return IdentifierExpression(value: token.value)
   }
 
+  private mutating func parseIfExpression() throws -> IfExpression {
+    _ = try consume("if")
+    guard let condition = try parseExpression() else {
+      throw ParserError.ifExpressionMissingCondition
+    }
+
+    _ = try consume("then")
+    guard let thenExpression = try parseExpression() else {
+      throw ParserError.ifExpressionMissingThenExpression
+    }
+
+    var elseExpression: (any Expression)?
+
+    if let token = peek(), token.value == "else" {
+      _ = try consume("else")
+      elseExpression = try parseExpression()
+    }
+
+    return IfExpression(
+      condition: condition,
+      thenExpression: thenExpression,
+      elseExpression: elseExpression)
+  }
+
   private mutating func parseFactor() throws -> (any Expression)? {
     guard let token = peek() else {
       return nil
@@ -63,6 +87,10 @@ struct Parser {
 
     if token.value == "(" {
       return try parseParenthesized()
+    }
+
+    if token.value == "if" {
+      return try parseIfExpression()
     }
 
     switch token.type {
