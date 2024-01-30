@@ -6,13 +6,13 @@ struct Parser {
     self.tokens = tokens
   }
 
-  func peek() -> Token? {
-    return position < tokens.count ? tokens[position] : nil
-  }
-
   mutating func parse() throws -> (any Expression)? {
     let expression = try parseExpression()
     return expression
+  }
+
+  private func peek() -> Token? {
+    return position < tokens.count ? tokens[position] : nil
   }
 
   private mutating func consume(_ expected: String...) throws -> Token? {
