@@ -159,4 +159,24 @@ final class ParserTests: XCTestCase {
         thenExpression: LiteralExpression<Int>(value: 2),
         elseExpression: nil))
   }
+
+  func test_j_parse_if_else_statement() throws {
+    var tokenizer = Tokenizer(input: "if 3 then 2 else 1")
+    tokenizer.tokenize()
+    var parser = Parser(tokens: tokenizer.tokens)
+    let expression = try parser.parse()
+    guard
+      let ifExpression = expression
+        as? IfExpression
+    else {
+      XCTFail("Expected IfExpression, got \(String(describing: expression))")
+      return
+    }
+    XCTAssertEqual(
+      ifExpression,
+      IfExpression(
+        condition: LiteralExpression(value: 3),
+        thenExpression: LiteralExpression<Int>(value: 2),
+        elseExpression: LiteralExpression<Int>(value: 1)))
+  }
 }
