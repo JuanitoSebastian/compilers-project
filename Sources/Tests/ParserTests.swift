@@ -139,4 +139,24 @@ final class ParserTests: XCTestCase {
           expected: [TokenType.integerLiteral, TokenType.identifier]))
     }
   }
+
+  func test_i_parse_if_statement() throws {
+    var tokenizer = Tokenizer(input: "if 3 then 2 ")
+    tokenizer.tokenize()
+    var parser = Parser(tokens: tokenizer.tokens)
+    let expression = try parser.parse()
+    guard
+      let ifExpression = expression
+        as? IfExpression
+    else {
+      XCTFail("Expected IfExpression, got \(String(describing: expression))")
+      return
+    }
+    XCTAssertEqual(
+      ifExpression,
+      IfExpression(
+        condition: LiteralExpression(value: 3),
+        thenExpression: LiteralExpression<Int>(value: 2),
+        elseExpression: nil))
+  }
 }
