@@ -1,4 +1,4 @@
-struct IfExpression: Expression, Equatable {
+struct IfExpression: Expression, Equatable, CustomStringConvertible {
   let type: ExpressionType = .ifExpression
 
   let condition: (any Expression)
@@ -9,5 +9,10 @@ struct IfExpression: Expression, Equatable {
     return areExpressionsEqual(lhs.condition, rhs.condition)
       && areExpressionsEqual(lhs.thenExpression, rhs.thenExpression)
       && areExpressionsEqual(lhs.elseExpression, rhs.elseExpression)
+  }
+
+  var description: String {
+    return
+      "IfExpression: (\(condition)) then (\(thenExpression)) \(elseExpression != nil ? "else (\(elseExpression!))" : "")"
   }
 }

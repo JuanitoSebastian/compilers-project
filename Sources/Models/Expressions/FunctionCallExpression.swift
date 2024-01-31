@@ -1,4 +1,4 @@
-struct FunctionCallExpression: Expression, Equatable {
+struct FunctionCallExpression: Expression, Equatable, CustomStringConvertible {
   let type: ExpressionType = .functionCall
   let identifier: IdentifierExpression
   let arguments: [any Expression]
@@ -13,5 +13,10 @@ struct FunctionCallExpression: Expression, Equatable {
       return argumentsEqual
     }
     return false
+  }
+
+  var description: String {
+    return
+      "FunctionCallExpression: \(identifier)(\(arguments.map { $0.description }.joined(separator: ", ")))"
   }
 }
