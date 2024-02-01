@@ -24,3 +24,12 @@ func areExpressionsEqual(_ lhs: (any Expression)?, _ rhs: (any Expression)?) -> 
     return (lhs as? FunctionCallExpression) == (rhs as? FunctionCallExpression)
   }
 }
+
+let leftAssociativeBinaryOperators: [[String]] = [
+  ["or"],
+  ["and"],
+  ["==", "!="],
+  ["<", "<=", ">", ">="],
+  ["+", "-"],
+  ["*", "/"]
+]

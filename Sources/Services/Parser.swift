@@ -168,12 +168,3 @@ struct Parser {
     return left
   }
 }
-
-let leftAssociativeBinaryOperators: [[String]] = [
-  ["or"],
-  ["and"],
-  ["==", "!="],
-  ["<", "<=", ">", ">="],
-  ["+", "-"],
-  ["*", "/"]
-]
