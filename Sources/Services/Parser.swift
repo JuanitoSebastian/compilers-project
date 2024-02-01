@@ -126,23 +126,6 @@ struct Parser {
     return expression
   }
 
-  private mutating func parseTerm() throws -> (any Expression)? {
-    guard var left = try parseFactor() else {
-      return nil
-    }
-
-    while let op = peek(), ["*", "/"].contains(op.value) {
-      _ = try? consume()
-      guard let right = try parseFactor() else {
-        throw ParserError.noTokenFound(precedingToken: op)
-      }
-
-      left = BinaryOpExpression(left: left, op: op.value, right: right)
-    }
-
-    return left
-  }
-
   private mutating func parseFunctionCallParameters() throws -> [(any Expression)] {
     var expressions: [(any Expression)] = []
     _ = try consume("(")
@@ -155,8 +138,14 @@ struct Parser {
     return expressions
   }
 
-  private mutating func parseExpression() throws -> (any Expression)? {
-    guard var left = try parseTerm() else {
+  private mutating func parseExpression(
+    _ depth: Int = 0, previousExpression: (any Expression)? = nil
+  ) throws
+    -> (
+      any Expression
+    )?
+  {
+    guard let left = previousExpression != nil ? previousExpression : try parseFactor() else {
       return nil
     }
 
@@ -165,15 +154,26 @@ struct Parser {
       return FunctionCallExpression(identifier: left, arguments: parameters)
     }
 
-    while let op = peek(), ["+", "-"].contains(op.value) {
-      _ = try? consume()
-      guard let right = try parseTerm() else {
-        throw ParserError.noTokenFound(precedingToken: op)
+    for (offset, operators) in leftAssociativeBinaryOperators.enumerated().dropFirst(depth) {
+      while let op = peek(), operators.contains(op.value) {
+        _ = try? consume()
+        guard let right = try parseExpression(offset + 1) else {
+          throw ParserError.noTokenFound(precedingToken: op)
+        }
+
+        return try parseExpression(
+          previousExpression: BinaryOpExpression(left: left, op: op.value, right: right))
       }
-
-      left = BinaryOpExpression(left: left, op: op.value, right: right)
     }
-
     return left
   }
 }
+
+let leftAssociativeBinaryOperators: [[String]] = [
+  ["or"],
+  ["and"],
+  ["==", "!="],
+  ["<", "<=", ">", ">="],
+  ["+", "-"],
+  ["*", "/"]
+]
