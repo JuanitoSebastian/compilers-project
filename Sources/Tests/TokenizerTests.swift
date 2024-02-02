@@ -10,7 +10,7 @@ func L(_ line: Int) -> Location {
 }
 
 final class TokenizerTests: XCTestCase {
-  func test_a_tokens_recognized_correctly() throws {
+  func test_tokens_recognized_correctly() throws {
     let input = """
       if  3
       while true {
@@ -108,7 +108,7 @@ final class TokenizerTests: XCTestCase {
         location: L(3)))
   }
 
-  func test_b_line_comments_are_ignored() throws {
+  func test_line_comments_are_ignored() throws {
     let input = """
       if  3
       // while
@@ -138,7 +138,7 @@ final class TokenizerTests: XCTestCase {
 
   }
 
-  func test_c_integer_literals_tokenized_correctly() throws {
+  func test_integer_literals_tokenized_correctly() throws {
     let input = """
       1 2 400958 -1
       648
@@ -160,7 +160,7 @@ final class TokenizerTests: XCTestCase {
     })
   }
 
-  func test_d_OperatorTokens_tokenized_correctly() throws {
+  func test_OperatorTokens_tokenized_correctly() throws {
     let input = """
       + - * / % = == != < > <= >=
       """
@@ -173,7 +173,7 @@ final class TokenizerTests: XCTestCase {
     })
   }
 
-  func test_e_parse_and_check_token_position() throws {
+  func test_parse_and_check_token_position() throws {
     let input = "int hundred = 100"
     let expected = ["int", "hundred", "=", "100"]
     var tokenizer = Tokenizer(input: input)
@@ -184,7 +184,7 @@ final class TokenizerTests: XCTestCase {
     })
   }
 
-  func test_f_token_location_returns_appropariate_section_of_string() throws {
+  func test_token_location_returns_appropariate_section_of_string() throws {
     let input = "if (a == 3) { b = 4 }"
     var tokenizer = Tokenizer(input: input)
     tokenizer.tokenize()
@@ -194,7 +194,7 @@ final class TokenizerTests: XCTestCase {
     }
   }
 
-  func test_f_parse_binary_logical_op_tokens() throws {
+  func test_parse_binary_logical_op_tokens() throws {
     let input = "and or"
     let expected = ["and", "or"]
     var tokenizer = Tokenizer(input: input)
