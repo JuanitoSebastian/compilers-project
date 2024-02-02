@@ -244,7 +244,9 @@ final class ParserTests: XCTestCase {
         identifier: IdentifierExpression(value: "foo"),
         arguments: []))
   }
+}
 
+extension ParserTests {
   func test_parse_assignment_operator() throws {
     var tokenizer = Tokenizer(input: "a = 1 + 2 - 3")
     tokenizer.tokenize()
