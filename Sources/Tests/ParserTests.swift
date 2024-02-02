@@ -201,6 +201,16 @@ extension ParserTests {
     let noExpression = ParserHelper<NotExpression>(try parser.parse())!.e
     XCTAssertEqual(noExpression, NotExpression(value: LiteralExpression<Int>(value: 5)))
   }
+
+  func test_parse_not_not_expression() throws {
+    var tokenizer = Tokenizer(input: "not not 5")
+    tokenizer.tokenize()
+    var parser = Parser(tokens: tokenizer.tokens)
+    let intLiteralExpression = ParserHelper<LiteralExpression<Int>>(try parser.parse())!.e
+    XCTAssertEqual(
+      intLiteralExpression,
+      LiteralExpression<Int>(value: 5))
+  }
 }
 
 struct ParserHelper<T: Expression> {
