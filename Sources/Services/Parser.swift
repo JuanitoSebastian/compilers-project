@@ -28,72 +28,6 @@ struct Parser {
     return token
   }
 
-  private mutating func parseIntLiteral() throws -> LiteralExpression<Int>? {
-    guard let token = peek() else {
-      return nil
-    }
-
-    guard token.type == .integerLiteral, let value = Int(token.value) else {
-      throw ParserError.unexpectedTokenType(token: token, expected: [.integerLiteral])
-    }
-
-    _ = try? consume()
-
-    return LiteralExpression<Int>(value: value)
-  }
-
-  private mutating func parseBooleanLiteral() throws -> LiteralExpression<Bool>? {
-    guard let token = peek() else {
-      return nil
-    }
-
-    guard token.type == .booleanLiteral, let value = Bool(token.value) else {
-      throw ParserError.unexpectedTokenType(token: token, expected: [.booleanLiteral])
-    }
-
-    _ = try? consume()
-
-    return LiteralExpression<Bool>(value: value)
-  }
-
-  private mutating func parseIdentifier() throws -> IdentifierExpression? {
-    guard let token = peek() else {
-      return nil
-    }
-
-    guard token.type == .identifier else {
-      throw ParserError.unexpectedTokenType(token: token, expected: [.identifier])
-    }
-
-    _ = try? consume()
-
-    return IdentifierExpression(value: token.value)
-  }
-
-  private mutating func parseIfExpression() throws -> IfExpression {
-    _ = try consume("if")
-    guard let condition = try parseExpression() else {
-      throw ParserError.ifExpressionMissingCondition
-    }
-
-    _ = try consume("then")
-    guard let thenExpression = try parseExpression() else {
-      throw ParserError.ifExpressionMissingThenExpression
-    }
-
-    var elseExpression: (any Expression)?
-
-    if let token = peek(), token.value == "else" {
-      _ = try consume("else")
-      elseExpression = try parseExpression()
-    }
-
-    return IfExpression(
-      condition: condition,
-      thenExpression: thenExpression,
-      elseExpression: elseExpression)
-  }
-
   private mutating func parseFactor() throws -> (any Expression)? {
     guard let token = peek() else {
       return nil
@@ -167,5 +101,74 @@ struct Parser {
     }
 
     return left
+  }
+}
+
+// Functions for specific Expression types
+extension Parser {
+  private mutating func parseIntLiteral() throws -> LiteralExpression<Int>? {
+    guard let token = peek() else {
+      return nil
+    }
+
+    guard token.type == .integerLiteral, let value = Int(token.value) else {
+      throw ParserError.unexpectedTokenType(token: token, expected: [.integerLiteral])
+    }
+
+    _ = try? consume()
+
+    return LiteralExpression<Int>(value: value)
+  }
+
+  private mutating func parseBooleanLiteral() throws -> LiteralExpression<Bool>? {
+    guard let token = peek() else {
+      return nil
+    }
+
+    guard token.type == .booleanLiteral, let value = Bool(token.value) else {
+      throw ParserError.unexpectedTokenType(token: token, expected: [.booleanLiteral])
+    }
+
+    _ = try? consume()
+
+    return LiteralExpression<Bool>(value: value)
+  }
+
+  private mutating func parseIdentifier() throws -> IdentifierExpression? {
+    guard let token = peek() else {
+      return nil
+    }
+
+    guard token.type == .identifier else {
+      throw ParserError.unexpectedTokenType(token: token, expected: [.identifier])
+    }
+
+    _ = try? consume()
+
+    return IdentifierExpression(value: token.value)
+  }
+
+  private mutating func parseIfExpression() throws -> IfExpression {
+    _ = try consume("if")
+    guard let condition = try parseExpression() else {
+      throw ParserError.ifExpressionMissingCondition
+    }
+
+    _ = try consume("then")
+    guard let thenExpression = try parseExpression() else {
+      throw ParserError.ifExpressionMissingThenExpression
+    }
+
+    var elseExpression: (any Expression)?
+
+    if let token = peek(), token.value == "else" {
+      _ = try consume("else")
+      elseExpression = try parseExpression()
+    }
+
+    return IfExpression(
+      condition: condition,
+      thenExpression: thenExpression,
+      elseExpression: elseExpression)
   }
 }
