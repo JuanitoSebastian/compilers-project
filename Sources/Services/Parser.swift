@@ -33,6 +33,10 @@ struct Parser {
       return nil
     }
 
+    if token.value == "not" {
+      return try parseNotExpression()
+    }
+
     if token.value == "(" {
       return try parseParenthesized()
     }
@@ -106,6 +110,26 @@ struct Parser {
 
 // Functions for specific Expression types
 extension Parser {
+  private mutating func parseNotExpression() throws -> (any Expression)? {
+    var not = false
+    var latestToken: Token?
+    while let token = peek() {
+      latestToken = token
+      if token.value == "not" {
+        _ = try consume()
+        not = !not
+      } else {
+        break
+      }
+    }
+
+    guard let value = try parseFactor() else {
+      throw ParserError.noTokenFound(precedingToken: latestToken)
+    }
+
+    return not ? NotExpression(value: value) : value
+  }
+
   private mutating func parseIntLiteral() throws -> LiteralExpression<Int>? {
     guard let token = peek() else {
       return nil
