@@ -149,11 +149,6 @@ struct Parser {
       return nil
     }
 
-    if let next = peek(), next.value == "(", let left = left as? IdentifierExpression {
-      let parameters = try parseFunctionCallParameters()
-      return FunctionCallExpression(identifier: left, arguments: parameters)
-    }
-
     for (offset, operators) in leftAssociativeBinaryOperators.enumerated().dropFirst(depth) {
       while let op = peek(), operators.contains(op.value) {
         _ = try? consume()
@@ -165,6 +160,12 @@ struct Parser {
           previousExpression: BinaryOpExpression(left: left, op: op.value, right: right))
       }
     }
+
+    if let next = peek(), next.value == "(", let left = left as? IdentifierExpression {
+      let parameters = try parseFunctionCallParameters()
+      return FunctionCallExpression(identifier: left, arguments: parameters)
+    }
+
     return left
   }
 }
