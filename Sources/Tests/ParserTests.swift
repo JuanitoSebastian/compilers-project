@@ -7,14 +7,7 @@ final class ParserTests: XCTestCase {
     var tokenizer = Tokenizer(input: "1 + 2")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
-    let expression = try parser.parse()
-    guard
-      let binaryOpExpression = expression
-        as? BinaryOpExpression
-    else {
-      XCTFail("Expected BinaryOpExpression, got \(String(describing: expression))")
-      return
-    }
+    let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse())!.e
     XCTAssertEqual(
       binaryOpExpression,
       BinaryOpExpression(
@@ -25,14 +18,7 @@ final class ParserTests: XCTestCase {
     var tokenizer = Tokenizer(input: "1 + a")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
-    let expression = try parser.parse()
-    guard
-      let binaryOpExpression = expression
-        as? BinaryOpExpression
-    else {
-      XCTFail("Expected BinaryOpExpression, got \(String(describing: expression))")
-      return
-    }
+    let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse())!.e
     XCTAssertEqual(
       binaryOpExpression,
       BinaryOpExpression(
@@ -43,14 +29,7 @@ final class ParserTests: XCTestCase {
     var tokenizer = Tokenizer(input: "10 + a - 3")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
-    let expression = try parser.parse()
-    guard
-      let binaryOpExpression = expression
-        as? BinaryOpExpression
-    else {
-      XCTFail("Expected BinaryOpExpression, got \(String(describing: expression))")
-      return
-    }
+    let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse())!.e
     XCTAssertEqual(
       binaryOpExpression,
       BinaryOpExpression(
@@ -64,14 +43,7 @@ final class ParserTests: XCTestCase {
     var tokenizer = Tokenizer(input: "2 - 10 * 2")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
-    let expression = try parser.parse()
-    guard
-      let binaryOpExpression = expression
-        as? BinaryOpExpression
-    else {
-      XCTFail("Expected BinaryOpExpression, got \(String(describing: expression))")
-      return
-    }
+    let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse())!.e
     XCTAssertEqual(
       binaryOpExpression,
       BinaryOpExpression(
@@ -85,14 +57,7 @@ final class ParserTests: XCTestCase {
     var tokenizer = Tokenizer(input: "(2 - 10) * 2")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
-    let expression = try parser.parse()
-    guard
-      let binaryOpExpression = expression
-        as? BinaryOpExpression
-    else {
-      XCTFail("Expected BinaryOpExpression, got \(String(describing: expression))")
-      return
-    }
+    let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse())!.e
     XCTAssertEqual(
       binaryOpExpression,
       BinaryOpExpression(
@@ -144,14 +109,7 @@ final class ParserTests: XCTestCase {
     var tokenizer = Tokenizer(input: "if false then 2 ")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
-    let expression = try parser.parse()
-    guard
-      let ifExpression = expression
-        as? IfExpression
-    else {
-      XCTFail("Expected IfExpression, got \(String(describing: expression))")
-      return
-    }
+    let ifExpression = ParserHelper<IfExpression>(try parser.parse())!.e
     XCTAssertEqual(
       ifExpression,
       IfExpression(
@@ -164,14 +122,7 @@ final class ParserTests: XCTestCase {
     var tokenizer = Tokenizer(input: "if 3 then 2 else true")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
-    let expression = try parser.parse()
-    guard
-      let ifExpression = expression
-        as? IfExpression
-    else {
-      XCTFail("Expected IfExpression, got \(String(describing: expression))")
-      return
-    }
+    let ifExpression = ParserHelper<IfExpression>(try parser.parse())!.e
     XCTAssertEqual(
       ifExpression,
       IfExpression(
@@ -184,14 +135,7 @@ final class ParserTests: XCTestCase {
     var tokenizer = Tokenizer(input: "1 + if true then 2 else 3")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
-    let expression = try parser.parse()
-    guard
-      let binaryOpExpression = expression
-        as? BinaryOpExpression
-    else {
-      XCTFail("Expected BinaryOpExpression, got \(String(describing: expression))")
-      return
-    }
+    let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse())!.e
     XCTAssertEqual(
       binaryOpExpression,
       BinaryOpExpression(
@@ -208,14 +152,7 @@ final class ParserTests: XCTestCase {
     var tokenizer = Tokenizer(input: "foo(1, 2)")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
-    let expression = try parser.parse()
-    guard
-      let functionCallExpression = expression
-        as? FunctionCallExpression
-    else {
-      XCTFail("Expected FunctionCallExpression, got \(String(describing: expression))")
-      return
-    }
+    let functionCallExpression = ParserHelper<FunctionCallExpression>(try parser.parse())!.e
     XCTAssertEqual(
       functionCallExpression,
       FunctionCallExpression(
@@ -230,14 +167,7 @@ final class ParserTests: XCTestCase {
     var tokenizer = Tokenizer(input: "foo()")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
-    let expression = try parser.parse()
-    guard
-      let functionCallExpression = expression
-        as? FunctionCallExpression
-    else {
-      XCTFail("Expected FunctionCallExpression, got \(String(describing: expression))")
-      return
-    }
+    let functionCallExpression = ParserHelper<FunctionCallExpression>(try parser.parse())!.e
     XCTAssertEqual(
       functionCallExpression,
       FunctionCallExpression(
@@ -251,14 +181,7 @@ extension ParserTests {
     var tokenizer = Tokenizer(input: "a = 1 + 2 - 3")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
-    let expression = try parser.parse()
-    guard
-      let binaryOpExpression = expression
-        as? BinaryOpExpression
-    else {
-      XCTFail("Expected BinaryOpExpression, got \(String(describing: expression))")
-      return
-    }
+    let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse())!.e
     XCTAssertEqual(
       binaryOpExpression,
       BinaryOpExpression(
