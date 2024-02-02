@@ -270,4 +270,12 @@ extension ParserTests {
           op: "-",
           right: LiteralExpression(value: 3))))
   }
+
+  func test_parse_not_expression() throws {
+    var tokenizer = Tokenizer(input: "not 5")
+    tokenizer.tokenize()
+    var parser = Parser(tokens: tokenizer.tokens)
+    let noExpression = ParserHelper<NotExpression>(try parser.parse())!.e
+    XCTAssertEqual(noExpression, NotExpression(value: LiteralExpression<Int>(value: 5)))
+  }
 }
