@@ -279,3 +279,17 @@ extension ParserTests {
     XCTAssertEqual(noExpression, NotExpression(value: LiteralExpression<Int>(value: 5)))
   }
 }
+
+struct ParserHelper<T: Expression> {
+  // swiftlint:disable:next identifier_name
+  let e: T
+
+  init?(_ expression: (any Expression)?) {
+    if let expression = expression as? T {
+      self.e = expression
+    } else {
+      XCTFail("Expected \(T.self), got \(String(describing: expression))")
+      return nil
+    }
+  }
+}
