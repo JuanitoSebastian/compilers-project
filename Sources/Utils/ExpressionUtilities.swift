@@ -26,10 +26,11 @@ func areExpressionsEqual(_ lhs: (any Expression)?, _ rhs: (any Expression)?) -> 
 }
 
 let leftAssociativeBinaryOperators: [[String]] = [
+  ["="],
   ["or"],
   ["and"],
   ["==", "!="],
   ["<", "<=", ">", ">="],
   ["+", "-"],
-  ["*", "/"]
+  ["*", "/", "%"]
 ]
