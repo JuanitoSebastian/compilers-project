@@ -3,7 +3,7 @@ import XCTest
 @testable import swiftcompiler
 
 final class ParserTests: XCTestCase {
-  func test_a_parse_addition_with_ints() throws {
+  func test_parse_addition_with_ints() throws {
     var tokenizer = Tokenizer(input: "1 + 2")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
@@ -21,7 +21,7 @@ final class ParserTests: XCTestCase {
         left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)))
   }
 
-  func test_b_parse_addition_with_int_and_identifier() throws {
+  func test_parse_addition_with_int_and_identifier() throws {
     var tokenizer = Tokenizer(input: "1 + a")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
@@ -39,7 +39,7 @@ final class ParserTests: XCTestCase {
         left: LiteralExpression(value: 1), op: "+", right: IdentifierExpression(value: "a")))
   }
 
-  func test_c_parse_operation_with_multiple_numbers() throws {
+  func test_parse_operation_with_multiple_numbers() throws {
     var tokenizer = Tokenizer(input: "10 + a - 3")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
@@ -60,7 +60,7 @@ final class ParserTests: XCTestCase {
         right: LiteralExpression(value: 3)))
   }
 
-  func test_d_parse_multiplication() throws {
+  func test_parse_multiplication() throws {
     var tokenizer = Tokenizer(input: "2 - 10 * 2")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
@@ -81,7 +81,7 @@ final class ParserTests: XCTestCase {
           left: LiteralExpression(value: 10), op: "*", right: LiteralExpression(value: 2))))
   }
 
-  func test_e_parse_parentesis() throws {
+  func test_parse_parentesis() throws {
     var tokenizer = Tokenizer(input: "(2 - 10) * 2")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
@@ -102,7 +102,7 @@ final class ParserTests: XCTestCase {
         right: LiteralExpression(value: 2)))
   }
 
-  func test_f_orphan_plus_sign_throws() throws {
+  func test_orphan_plus_sign_throws() throws {
     var tokenizer = Tokenizer(input: "1 + 2 +")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
@@ -114,7 +114,7 @@ final class ParserTests: XCTestCase {
     }
   }
 
-  func test_g_oprhan_multiply_sign_throws() throws {
+  func test_oprhan_multiply_sign_throws() throws {
     var tokenizer = Tokenizer(input: "1 + 2 *")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
@@ -126,7 +126,7 @@ final class ParserTests: XCTestCase {
     }
   }
 
-  func test_h_empty_parentheses_throws() throws {
+  func test_empty_parentheses_throws() throws {
     var tokenizer = Tokenizer(input: "()")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
@@ -140,7 +140,7 @@ final class ParserTests: XCTestCase {
     }
   }
 
-  func test_i_parse_if_statement() throws {
+  func test_parse_if_statement() throws {
     var tokenizer = Tokenizer(input: "if false then 2 ")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
@@ -160,7 +160,7 @@ final class ParserTests: XCTestCase {
         elseExpression: nil))
   }
 
-  func test_j_parse_if_else_statement() throws {
+  func test_parse_if_else_statement() throws {
     var tokenizer = Tokenizer(input: "if 3 then 2 else true")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
@@ -180,7 +180,31 @@ final class ParserTests: XCTestCase {
         elseExpression: LiteralExpression<Bool>(value: true)))
   }
 
-  func test_k_parse_function_call() throws {
+  func test_parse_if_expression_as_part_of_other_expression() throws {
+    var tokenizer = Tokenizer(input: "1 + if true then 2 else 3")
+    tokenizer.tokenize()
+    var parser = Parser(tokens: tokenizer.tokens)
+    let expression = try parser.parse()
+    guard
+      let binaryOpExpression = expression
+        as? BinaryOpExpression
+    else {
+      XCTFail("Expected BinaryOpExpression, got \(String(describing: expression))")
+      return
+    }
+    XCTAssertEqual(
+      binaryOpExpression,
+      BinaryOpExpression(
+        left: LiteralExpression(value: 1),
+        op: "+",
+        right: IfExpression(
+          condition: LiteralExpression<Bool>(value: true),
+          thenExpression: LiteralExpression<Int>(value: 2),
+          elseExpression: LiteralExpression<Int>(value: 3)))
+    )
+  }
+
+  func test_parse_function_call() throws {
     var tokenizer = Tokenizer(input: "foo(1, 2)")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
@@ -202,7 +226,7 @@ final class ParserTests: XCTestCase {
         ]))
   }
 
-  func test_l_parse_function_call_with_no_parameters() throws {
+  func test_parse_function_call_with_no_parameters() throws {
     var tokenizer = Tokenizer(input: "foo()")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
@@ -219,5 +243,29 @@ final class ParserTests: XCTestCase {
       FunctionCallExpression(
         identifier: IdentifierExpression(value: "foo"),
         arguments: []))
+  }
+
+  func test_parse_assignment_operator() throws {
+    var tokenizer = Tokenizer(input: "a = 1 + 2 - 3")
+    tokenizer.tokenize()
+    var parser = Parser(tokens: tokenizer.tokens)
+    let expression = try parser.parse()
+    guard
+      let binaryOpExpression = expression
+        as? BinaryOpExpression
+    else {
+      XCTFail("Expected BinaryOpExpression, got \(String(describing: expression))")
+      return
+    }
+    XCTAssertEqual(
+      binaryOpExpression,
+      BinaryOpExpression(
+        left: IdentifierExpression(value: "a"),
+        op: "=",
+        right: BinaryOpExpression(
+          left: BinaryOpExpression(
+            left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)),
+          op: "-",
+          right: LiteralExpression(value: 3))))
   }
 }
