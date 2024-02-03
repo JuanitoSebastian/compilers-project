@@ -112,6 +112,9 @@ struct Parser {
 
 // Functions for specific Expression types
 extension Parser {
+
+  /// Parses a not expresison. Chained nots are parsed as a single not expression.
+  /// - Returns: A not expression or the nots cancel out
   private mutating func parseNotExpression() throws -> (any Expression)? {
     var not = false
     var latestToken: Token?
@@ -132,6 +135,7 @@ extension Parser {
     return not ? NotExpression(value: value) : value
   }
 
+  /// Parses a literal expression. Currently supported Int and Bool literals.
   private mutating func parseLiteral<T: LiteralExpressionValue>(_ expected: TokenType) throws
     -> LiteralExpression<T>
   {
