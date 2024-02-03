@@ -47,10 +47,10 @@ struct Parser {
 
     switch token.type {
     case .integerLiteral:
-      let literal: LiteralExpression<Int> = try parseLiteral()
+      let literal: LiteralExpression<Int> = try parseLiteral(token.type)
       return literal
     case .booleanLiteral:
-      let literal: LiteralExpression<Bool> = try parseLiteral()
+      let literal: LiteralExpression<Bool> = try parseLiteral(token.type)
       return literal
     case .identifier:
       return try parseIdentifier()
@@ -132,13 +132,14 @@ extension Parser {
     return not ? NotExpression(value: value) : value
   }
 
-  private mutating func parseLiteral<T: LiteralExpressionValue>() throws -> LiteralExpression<T> {
+  private mutating func parseLiteral<T: LiteralExpressionValue>(_ expected: TokenType) throws
+    -> LiteralExpression<T>
+  {
     guard let token = peek() else {
       throw ParserError.noTokenFound(precedingToken: nil)
     }
 
     guard let value = T(token.value) else {
-      let expected: TokenType = T.self == Int.self ? .integerLiteral : .booleanLiteral
       throw ParserError.unexpectedTokenType(token: token, expected: [expected])
     }
 
