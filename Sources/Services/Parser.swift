@@ -6,9 +6,12 @@ struct Parser {
     self.tokens = tokens
   }
 
-  mutating func parse() throws -> (any Expression)? {
-    let expression = try parseExpression()
-    return expression
+  mutating func parse() throws -> [(any Expression)?] {
+    var expressions: [(any Expression)?] = []
+    while position < tokens.count {
+      expressions.append(try parseExpression())
+    }
+    return expressions
   }
 
   private func peek() -> Token? {
