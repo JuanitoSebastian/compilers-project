@@ -5,4 +5,5 @@ enum ExpressionType {
   case ifExpression
   case functionCall
   case not
+  case block
 }
