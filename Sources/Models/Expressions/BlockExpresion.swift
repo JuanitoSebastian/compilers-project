@@ -1,9 +1,12 @@
 struct BlockExpression: Expression, Equatable, CustomStringConvertible {
   var type: ExpressionType = .block
   let statements: [(any Expression)]
+  let resultExpression: (any Expression)?
 
   static func == (lhs: BlockExpression, rhs: BlockExpression) -> Bool {
-    if lhs.statements.count == rhs.statements.count {
+    if lhs.statements.count == rhs.statements.count
+      && areExpressionsEqual(lhs.resultExpression, rhs.resultExpression)
+    {
       for (lhs, rhs) in zip(lhs.statements, rhs.statements) where !areExpressionsEqual(lhs, rhs) {
         return false
       }
@@ -13,6 +16,6 @@ struct BlockExpression: Expression, Equatable, CustomStringConvertible {
   }
 
   var description: String {
-    return "Block(\(statements.map { $0.description }.joined(separator: "\n"))"
+    return "Block(\(statements.map { $0.description }.joined(separator: "\n")))"
   }
 }
