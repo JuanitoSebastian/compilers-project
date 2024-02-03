@@ -12,6 +12,8 @@ where Element: LiteralExpressionValue, Element: Equatable {
   }
 }
 
-protocol LiteralExpressionValue {}
+protocol LiteralExpressionValue {
+  init?(_ value: String)
+}
 extension Int: LiteralExpressionValue {}
 extension Bool: LiteralExpressionValue {}
