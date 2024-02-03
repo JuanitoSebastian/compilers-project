@@ -4,4 +4,5 @@ enum ParserError: Error, Equatable {
   case noTokenFound(precedingToken: Token?)
   case ifExpressionMissingCondition
   case ifExpressionMissingThenExpression
+  case missingSemicolon(token: Token)
 }
