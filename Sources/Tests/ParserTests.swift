@@ -211,6 +211,27 @@ extension ParserTests {
       intLiteralExpression,
       LiteralExpression<Int>(value: 5))
   }
+
+  func test_parse_block_expression() throws {
+    var tokenizer = Tokenizer(input: "{ a = 1 + 2 - 3; }")
+    tokenizer.tokenize()
+    var parser = Parser(tokens: tokenizer.tokens)
+    let blockExpression = ParserHelper<BlockExpression>(try parser.parse()[0])!.e
+    XCTAssertEqual(
+      blockExpression,
+      BlockExpression(
+        statements: [
+          BinaryOpExpression(
+            left: IdentifierExpression(value: "a"),
+            op: "=",
+            right: BinaryOpExpression(
+              left: BinaryOpExpression(
+                left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)),
+              op: "-",
+              right: LiteralExpression(value: 3))
+          )
+        ], resultExpression: nil))
+  }
 }
 
 struct ParserHelper<T: Expression> {
