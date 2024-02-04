@@ -48,6 +48,10 @@ struct Parser {
       return try parseIfExpression()
     }
 
+    if token.value == "{" {
+      return try parseBlockExpression()
+    }
+
     switch token.type {
     case .integerLiteral:
       let literal: LiteralExpression<Int> = try parseLiteral(token.type)
@@ -115,6 +119,29 @@ struct Parser {
 
 // Functions for specific Expression types
 extension Parser {
+
+  private mutating func parseBlockExpression() throws -> BlockExpression {
+    // TODO: Make this better and more readable
+    _ = try consume("{")
+    var expressions: [(any Expression)] = []
+    var resultExpression: (any Expression)?
+    while let token = peek(), token.value != "}" {
+      if let expression = try parseExpression() {
+        expressions.append(expression)
+        if let nextToken = peek(), nextToken.value == ";" {
+          _ = try consume(";")
+          continue
+        } else if let nextToken = peek() {
+          guard resultExpression == nil else {
+            throw ParserError.missingSemicolon(token: token)
+          }
+          resultExpression = expression
+        }
+      }
+    }
+    _ = try consume("}")
+    return BlockExpression(statements: expressions, resultExpression: resultExpression)
+  }
 
   /// Parses a not expresison. Chained nots are parsed as a single not expression.
   /// - Returns: A not expression or the nots cancel out

@@ -16,6 +16,8 @@ struct BlockExpression: Expression, Equatable, CustomStringConvertible {
   }
 
   var description: String {
-    return "Block(\(statements.map { $0.description }.joined(separator: "\n")))"
+    return
+      "Block(statements: \(statements.map { $0.description }.joined(separator: ", "))) "
+      + "result: (\(resultExpression?.description ?? "nil")"
   }
 }

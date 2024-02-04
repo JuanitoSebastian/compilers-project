@@ -1,7 +1,9 @@
 let input = """
+  {
     f(a);
     x = y;
     f(x)
+  }
   """
 var tokenizer = Tokenizer(input: input)
 tokenizer.tokenize()
