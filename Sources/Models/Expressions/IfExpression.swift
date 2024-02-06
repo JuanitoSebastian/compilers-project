@@ -14,6 +14,6 @@ struct IfExpression: Expression, Equatable, CustomStringConvertible {
   var description: String {
     return
       "IfExpression: (\(condition)) then (\(thenExpression))"
-      + "\(elseExpression != nil ? "else (\(elseExpression!))" : "")"
+      + "\(elseExpression != nil ? " else (\(elseExpression!))" : "")"
   }
 }
