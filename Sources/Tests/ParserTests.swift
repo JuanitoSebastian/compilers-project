@@ -35,8 +35,7 @@ final class ParserTests: XCTestCase {
       BinaryOpExpression(
         left: BinaryOpExpression(
           left: LiteralExpression(value: 10), op: "+", right: IdentifierExpression(value: "a")),
-        op: "-",
-        right: LiteralExpression(value: 3)))
+        op: "-", right: LiteralExpression(value: 3)))
   }
 
   func test_parse_multiplication() throws {
@@ -47,8 +46,7 @@ final class ParserTests: XCTestCase {
     XCTAssertEqual(
       binaryOpExpression,
       BinaryOpExpression(
-        left: LiteralExpression(value: 2),
-        op: "-",
+        left: LiteralExpression(value: 2), op: "-",
         right: BinaryOpExpression(
           left: LiteralExpression(value: 10), op: "*", right: LiteralExpression(value: 2))))
   }
@@ -62,8 +60,7 @@ final class ParserTests: XCTestCase {
       binaryOpExpression,
       BinaryOpExpression(
         left: BinaryOpExpression(
-          left: LiteralExpression(value: 2), op: "-", right: LiteralExpression(value: 10)),
-        op: "*",
+          left: LiteralExpression(value: 2), op: "-", right: LiteralExpression(value: 10)), op: "*",
         right: LiteralExpression(value: 2)))
   }
 
@@ -74,8 +71,7 @@ final class ParserTests: XCTestCase {
     XCTAssertThrowsError(try parser.parse()) { error in
       XCTAssertEqual(
         error as? ParserError,
-        ParserError.noTokenFound(
-          precedingToken: Token(type: .op, value: "+", location: L(0))))
+        ParserError.noTokenFound(precedingToken: Token(type: .op, value: "+", location: L(0))))
     }
   }
 
@@ -86,8 +82,7 @@ final class ParserTests: XCTestCase {
     XCTAssertThrowsError(try parser.parse()) { error in
       XCTAssertEqual(
         error as? ParserError,
-        ParserError.noTokenFound(
-          precedingToken: Token(type: .op, value: "*", location: L(0))))
+        ParserError.noTokenFound(precedingToken: Token(type: .op, value: "*", location: L(0))))
     }
   }
 
@@ -99,8 +94,7 @@ final class ParserTests: XCTestCase {
       XCTAssertEqual(
         error as? ParserError,
         ParserError.unexpectedTokenType(
-          token: Token(
-            type: .punctuation, value: ")", location: L(0)),
+          token: Token(type: .punctuation, value: ")", location: L(0)),
           expected: [TokenType.integerLiteral, TokenType.identifier]))
     }
   }
@@ -114,8 +108,7 @@ final class ParserTests: XCTestCase {
       ifExpression,
       IfExpression(
         condition: LiteralExpression<Bool>(value: false),
-        thenExpression: LiteralExpression<Int>(value: 2),
-        elseExpression: nil))
+        thenExpression: LiteralExpression<Int>(value: 2), elseExpression: nil))
   }
 
   func test_parse_if_else_statement() throws {
@@ -126,8 +119,7 @@ final class ParserTests: XCTestCase {
     XCTAssertEqual(
       ifExpression,
       IfExpression(
-        condition: LiteralExpression(value: 3),
-        thenExpression: LiteralExpression<Int>(value: 2),
+        condition: LiteralExpression(value: 3), thenExpression: LiteralExpression<Int>(value: 2),
         elseExpression: LiteralExpression<Bool>(value: true)))
   }
 
@@ -139,13 +131,11 @@ final class ParserTests: XCTestCase {
     XCTAssertEqual(
       binaryOpExpression,
       BinaryOpExpression(
-        left: LiteralExpression(value: 1),
-        op: "+",
+        left: LiteralExpression(value: 1), op: "+",
         right: IfExpression(
           condition: LiteralExpression<Bool>(value: true),
           thenExpression: LiteralExpression<Int>(value: 2),
-          elseExpression: LiteralExpression<Int>(value: 3)))
-    )
+          elseExpression: LiteralExpression<Int>(value: 3))))
   }
 
   func test_parse_function_call() throws {
@@ -157,10 +147,7 @@ final class ParserTests: XCTestCase {
       functionCallExpression,
       FunctionCallExpression(
         identifier: IdentifierExpression(value: "foo"),
-        arguments: [
-          LiteralExpression<Int>(value: 1),
-          LiteralExpression<Int>(value: 2)
-        ]))
+        arguments: [LiteralExpression<Int>(value: 1), LiteralExpression<Int>(value: 2)]))
   }
 
   func test_parse_function_call_with_no_parameters() throws {
@@ -170,9 +157,7 @@ final class ParserTests: XCTestCase {
     let functionCallExpression = ParserHelper<FunctionCallExpression>(try parser.parse()[0])!.e
     XCTAssertEqual(
       functionCallExpression,
-      FunctionCallExpression(
-        identifier: IdentifierExpression(value: "foo"),
-        arguments: []))
+      FunctionCallExpression(identifier: IdentifierExpression(value: "foo"), arguments: []))
   }
 }
 
@@ -185,13 +170,11 @@ extension ParserTests {
     XCTAssertEqual(
       binaryOpExpression,
       BinaryOpExpression(
-        left: IdentifierExpression(value: "a"),
-        op: "=",
+        left: IdentifierExpression(value: "a"), op: "=",
         right: BinaryOpExpression(
           left: BinaryOpExpression(
             left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)),
-          op: "-",
-          right: LiteralExpression(value: 3))))
+          op: "-", right: LiteralExpression(value: 3))))
   }
 
   func test_parse_not_expression() throws {
@@ -207,9 +190,7 @@ extension ParserTests {
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
     let intLiteralExpression = ParserHelper<LiteralExpression<Int>>(try parser.parse()[0])!.e
-    XCTAssertEqual(
-      intLiteralExpression,
-      LiteralExpression<Int>(value: 5))
+    XCTAssertEqual(intLiteralExpression, LiteralExpression<Int>(value: 5))
   }
 
   func test_parse_block_expression() throws {
@@ -232,13 +213,11 @@ extension ParserTests {
       BlockExpression(
         statements: [
           BinaryOpExpression(
-            left: IdentifierExpression(value: "a"),
-            op: "=",
+            left: IdentifierExpression(value: "a"), op: "=",
             right: BinaryOpExpression(
               left: BinaryOpExpression(
                 left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)),
-              op: "-",
-              right: LiteralExpression(value: 3))),
+              op: "-", right: LiteralExpression(value: 3))),
           IfExpression(
             condition: BinaryOpExpression(
               left: LiteralExpression(value: 2), op: ">", right: LiteralExpression(value: 4)),
@@ -247,18 +226,14 @@ extension ParserTests {
                 FunctionCallExpression(
                   identifier: IdentifierExpression(value: "foo"),
                   arguments: [IdentifierExpression(value: "a")])
-              ],
-              resultExpression: nil),
+              ], resultExpression: nil),
             elseExpression: BlockExpression(
               statements: [
                 FunctionCallExpression(
                   identifier: IdentifierExpression(value: "foo"),
                   arguments: [LiteralExpression(value: 1)])
-              ],
-              resultExpression: nil)
-          )
-        ],
-        resultExpression: nil))
+              ], resultExpression: nil))
+        ], resultExpression: nil))
   }
 
   func test_parse_variable_declaration_in_block() throws {
@@ -272,15 +247,11 @@ extension ParserTests {
         statements: [
           VarDeclarationExpression(
             declaration: BinaryOpExpression(
-              left: IdentifierExpression(value: "a"),
-              op: "=",
+              left: IdentifierExpression(value: "a"), op: "=",
               right: BinaryOpExpression(
                 left: BinaryOpExpression(
                   left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)),
-                op: "-",
-                right: LiteralExpression(value: 3))
-            )
-          )
+                op: "-", right: LiteralExpression(value: 3))))
         ], resultExpression: nil))
   }
 
@@ -295,9 +266,31 @@ extension ParserTests {
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
     XCTAssertThrowsError(try parser.parse()) { error in
-      XCTAssertEqual(
-        error as? ParserError,
-        ParserError.varDeclarationOutsideBlock())
+      XCTAssertEqual(error as? ParserError, ParserError.varDeclarationOutsideBlock())
+    }
+  }
+
+  func test_parsing_invalid_blocks_throw_error() throws {
+    let inputs = ["{ a b }", "{ if true then { a } b c }"]
+    for input in inputs {
+      var tokenizer = Tokenizer(input: input)
+      tokenizer.tokenize()
+      var parser = Parser(tokens: tokenizer.tokens)
+      XCTAssertThrowsError(try parser.parse())
+    }
+  }
+
+  func test_parsing_valid_blocks_does_not_throw() throws {
+    let inputs = [
+      "{ { a } { b } }", "{ if true then { a } b }", "{ if true then { a }; b }",
+      "{ if true then { a } b; c }", "{ if true then { a } else { b } 3 }",
+      "x = { { f(a) } { b } }"
+    ]
+    for input in inputs {
+      var tokenizer = Tokenizer(input: input)
+      tokenizer.tokenize()
+      var parser = Parser(tokens: tokenizer.tokens)
+      XCTAssertNoThrow(try parser.parse())
     }
   }
 }
