@@ -26,6 +26,8 @@ func areExpressionsEqual(_ lhs: (any Expression)?, _ rhs: (any Expression)?) -> 
     return (lhs as? NotExpression) == (rhs as? NotExpression)
   case .block:
     return (lhs as? BlockExpression) == (rhs as? BlockExpression)
+  case .variableDeclaration:
+    return (lhs as? VarDeclarationExpression) == (rhs as? VarDeclarationExpression)
   }
 }
 

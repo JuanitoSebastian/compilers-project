@@ -6,4 +6,5 @@ enum ExpressionType {
   case functionCall
   case not
   case block
+  case variableDeclaration
 }
