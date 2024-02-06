@@ -3,5 +3,7 @@ identifier_name:
   allowed_symbols: "_"
 disabled_rules:
   - opening_brace
+cyclomatic_complexity:
+  warning: 15
 included:
   - Sources
