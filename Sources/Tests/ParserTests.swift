@@ -213,7 +213,17 @@ extension ParserTests {
   }
 
   func test_parse_block_expression() throws {
-    var tokenizer = Tokenizer(input: "{ a = 1 + 2 - 3; }")
+    let input = """
+      {
+        a = 1 + 2 - 3;
+        if 2 > 4 then {
+          foo(a);
+        } else {
+          foo(1);
+        }
+      }
+      """
+    var tokenizer = Tokenizer(input: input)
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
     let blockExpression = ParserHelper<BlockExpression>(try parser.parse()[0])!.e
@@ -228,9 +238,27 @@ extension ParserTests {
               left: BinaryOpExpression(
                 left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)),
               op: "-",
-              right: LiteralExpression(value: 3))
+              right: LiteralExpression(value: 3))),
+          IfExpression(
+            condition: BinaryOpExpression(
+              left: LiteralExpression(value: 2), op: ">", right: LiteralExpression(value: 4)),
+            thenExpression: BlockExpression(
+              statements: [
+                FunctionCallExpression(
+                  identifier: IdentifierExpression(value: "foo"),
+                  arguments: [IdentifierExpression(value: "a")])
+              ],
+              resultExpression: nil),
+            elseExpression: BlockExpression(
+              statements: [
+                FunctionCallExpression(
+                  identifier: IdentifierExpression(value: "foo"),
+                  arguments: [LiteralExpression(value: 1)])
+              ],
+              resultExpression: nil)
           )
-        ], resultExpression: nil))
+        ],
+        resultExpression: nil))
   }
 
   func test_parse_variable_declaration_in_block() throws {

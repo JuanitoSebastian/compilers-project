@@ -138,7 +138,7 @@ extension Parser {
         if let nextToken = peek(), nextToken.value == ";" {
           _ = try consume(";")
           continue
-        } else if peek() != nil {
+        } else if peek() != nil && peek(position - 1)?.value != "}" {
           guard resultExpression == nil else {
             throw ParserError.missingSemicolon(token: token)
           }
@@ -146,9 +146,11 @@ extension Parser {
         }
       }
     }
+
     if !alreadyInBlock {
       isInsideBlock = false
     }
+
     _ = try consume("}")
     return BlockExpression(statements: expressions, resultExpression: resultExpression)
   }
