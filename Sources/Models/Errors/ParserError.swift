@@ -5,4 +5,6 @@ enum ParserError: Error, Equatable {
   case ifExpressionMissingCondition
   case ifExpressionMissingThenExpression
   case missingSemicolon(token: Token)
+  case varDeclarationOutsideBlock(token: Token? = nil)
+  case varDeclarationMissingExpression(token: Token? = nil)
 }
