@@ -1,6 +1,7 @@
 struct Parser {
   let tokens: [Token]
   private var position: Int = 0
+  private var isInsideBlock = false
 
   init(tokens: [Token]) {
     self.tokens = tokens
@@ -108,9 +109,15 @@ struct Parser {
       }
     }
 
-    if let next = peek(), next.value == "(", let left = left as? IdentifierExpression {
-      let parameters = try parseFunctionCallParameters()
-      return FunctionCallExpression(identifier: left, arguments: parameters)
+    if let left = left as? IdentifierExpression {
+      if left.value == "var" {
+        return try parseVarDeclaration()
+      }
+
+      if let next = peek(), next.value == "(" {
+        let parameters = try parseFunctionCallParameters()
+        return FunctionCallExpression(identifier: left, arguments: parameters)
+      }
     }
 
     return left
@@ -123,6 +130,8 @@ extension Parser {
   private mutating func parseBlockExpression() throws -> BlockExpression {
     // TODO: Make this better and more readable
     _ = try consume("{")
+    let alreadyInBlock = isInsideBlock
+    isInsideBlock = true
     var expressions: [(any Expression)] = []
     var resultExpression: (any Expression)?
     while let token = peek(), token.value != "}" {
@@ -131,7 +140,7 @@ extension Parser {
         if let nextToken = peek(), nextToken.value == ";" {
           _ = try consume(";")
           continue
-        } else if let nextToken = peek() {
+        } else if peek() != nil {
           guard resultExpression == nil else {
             throw ParserError.missingSemicolon(token: token)
           }
@@ -139,8 +148,23 @@ extension Parser {
         }
       }
     }
+    if !alreadyInBlock {
+      isInsideBlock = false
+    }
     _ = try consume("}")
     return BlockExpression(statements: expressions, resultExpression: resultExpression)
+  }
+
+  private mutating func parseVarDeclaration() throws -> VarDeclarationExpression {
+    guard isInsideBlock else {
+      throw ParserError.varDeclarationOutsideBlock()
+    }
+
+    guard let expression = try parseExpression() as? BinaryOpExpression else {
+      throw ParserError.varDeclarationMissingExpression()
+    }
+
+    return VarDeclarationExpression(declaration: expression)
   }
 
   /// Parses a not expresison. Chained nots are parsed as a single not expression.
