@@ -1,8 +1,11 @@
 let input = """
   {
-    f(a);
-    x = y;
-    f(x)
+    a = 1 + 2 - 3;
+    if 2 > 4 then {
+      foo(a);
+    } else {
+      foo(1);
+    }
   }
   """
 var tokenizer = Tokenizer(input: input)
