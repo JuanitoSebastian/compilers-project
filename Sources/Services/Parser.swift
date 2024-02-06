@@ -89,11 +89,8 @@ struct Parser {
 
   private mutating func parseExpression(
     _ depth: Int = 0, previousExpression: (any Expression)? = nil
-  ) throws
-    -> (
-      any Expression
-    )?
-  {
+  ) throws -> (any Expression)? {
+
     guard let left = previousExpression != nil ? previousExpression : try parseFactor() else {
       return nil
     }
