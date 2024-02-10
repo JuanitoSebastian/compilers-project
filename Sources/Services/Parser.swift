@@ -160,11 +160,38 @@ extension Parser {
       throw ParserError.varDeclarationOutsideBlock()
     }
 
-    guard let expression = try parseExpression() as? BinaryOpExpression else {
+    guard let variableName = try parseIdentifier() else {
+      throw ParserError.varDeclarationInvalid()
+    }
+
+    var variableType: Type?
+    if let token = peek(), token.value == ":" {
+      _ = try consume()
+      guard let typeIdentifierExpression = try parseIdentifier() else {
+        throw ParserError.varDeclarationInvalid()
+      }
+      switch typeIdentifierExpression.value {
+      case "Int":
+        variableType = .int
+      case "Bool":
+        variableType = .bool
+      default:
+        throw ParserError.varDeclarationUnsupportedType()
+      }
+    }
+
+    _ = try consume("=")
+
+    guard let valueExpression = try parseExpression(1) else {
       throw ParserError.varDeclarationMissingExpression()
     }
 
-    return VarDeclarationExpression(declaration: expression)
+    let expression = BinaryOpExpression(
+      left: variableName,
+      op: "=",
+      right: valueExpression)
+
+    return VarDeclarationExpression(declaration: expression, variableType: variableType)
   }
 
   /// Parses a not expresison. Chained nots are parsed as a single not expression.

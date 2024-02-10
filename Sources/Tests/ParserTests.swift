@@ -270,6 +270,39 @@ extension ParserTests {
     }
   }
 
+  func test_parse_variable_expression_with_type() throws {
+    var tokenizer = Tokenizer(
+      input:
+        """
+        {
+          var a: Int = 1 + 2 - 3;
+          var b: Bool = true;
+        }
+        """
+    )
+    tokenizer.tokenize()
+    var parser = Parser(tokens: tokenizer.tokens)
+    let varDeclarationExpression = ParserHelper<BlockExpression>(try parser.parse()[0])!.e
+    XCTAssertEqual(
+      varDeclarationExpression,
+      BlockExpression(
+        statements: [
+          VarDeclarationExpression(
+            declaration: BinaryOpExpression(
+              left: IdentifierExpression(value: "a"), op: "=",
+              right: BinaryOpExpression(
+                left: BinaryOpExpression(
+                  left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)),
+                op: "-", right: LiteralExpression(value: 3))),
+            variableType: .int),
+          VarDeclarationExpression(
+            declaration: BinaryOpExpression(
+              left: IdentifierExpression(value: "b"), op: "=",
+              right: LiteralExpression(value: true)),
+            variableType: .bool)
+        ], resultExpression: nil))
+  }
+
   func test_parsing_invalid_blocks_throw_error() throws {
     let inputs = ["{ a b }", "{ if true then { a } b c }"]
     for input in inputs {
