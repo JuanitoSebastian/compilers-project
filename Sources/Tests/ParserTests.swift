@@ -246,12 +246,12 @@ extension ParserTests {
       BlockExpression(
         statements: [
           VarDeclarationExpression(
-            declaration: BinaryOpExpression(
-              left: IdentifierExpression(value: "a"), op: "=",
-              right: BinaryOpExpression(
-                left: BinaryOpExpression(
-                  left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)),
-                op: "-", right: LiteralExpression(value: 3))))
+            variableIdentifier: IdentifierExpression(value: "a"),
+            variableValue: BinaryOpExpression(
+              left: BinaryOpExpression(
+                left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)),
+              op: "-", right: LiteralExpression(value: 3)),
+            variableType: nil)
         ], resultExpression: nil))
   }
 
@@ -288,17 +288,16 @@ extension ParserTests {
       BlockExpression(
         statements: [
           VarDeclarationExpression(
-            declaration: BinaryOpExpression(
-              left: IdentifierExpression(value: "a"), op: "=",
-              right: BinaryOpExpression(
-                left: BinaryOpExpression(
-                  left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)),
-                op: "-", right: LiteralExpression(value: 3))),
+            variableIdentifier: IdentifierExpression(value: "a"),
+            variableValue: BinaryOpExpression(
+              left: BinaryOpExpression(
+                left: LiteralExpression<Int>(value: 1), op: "+",
+                right: LiteralExpression<Int>(value: 2)), op: "-",
+              right: LiteralExpression(value: 3)),
             variableType: .int),
           VarDeclarationExpression(
-            declaration: BinaryOpExpression(
-              left: IdentifierExpression(value: "b"), op: "=",
-              right: LiteralExpression(value: true)),
+            variableIdentifier: IdentifierExpression(value: "b"),
+            variableValue: LiteralExpression<Bool>(value: true),
             variableType: .bool)
         ], resultExpression: nil))
   }

@@ -112,6 +112,10 @@ struct Parser {
         return try parseVarDeclaration()
       }
 
+      if left.value == "while" {
+        return try parseWhileExpression()
+      }
+
       if let next = peek(), next.value == "(" {
         let parameters = try parseFunctionCallParameters()
         return FunctionCallExpression(identifier: left, arguments: parameters)
@@ -155,6 +159,18 @@ extension Parser {
     return BlockExpression(statements: expressions, resultExpression: resultExpression)
   }
 
+  private mutating func parseWhileExpression() throws -> WhileExpression {
+    guard let condition = try parseExpression() else {
+      throw ParserError.whileExpressionMissingCondition
+    }
+
+    _ = try consume("do")
+
+    let body = try parseBlockExpression()
+
+    return WhileExpression(condition: condition, body: body)
+  }
+
   private mutating func parseVarDeclaration() throws -> VarDeclarationExpression {
     guard isInsideBlock else {
       throw ParserError.varDeclarationOutsideBlock()
@@ -186,12 +202,8 @@ extension Parser {
       throw ParserError.varDeclarationMissingExpression()
     }
 
-    let expression = BinaryOpExpression(
-      left: variableName,
-      op: "=",
-      right: valueExpression)
-
-    return VarDeclarationExpression(declaration: expression, variableType: variableType)
+    return VarDeclarationExpression(
+      variableIdentifier: variableName, variableValue: valueExpression, variableType: variableType)
   }
 
   /// Parses a not expresison. Chained nots are parsed as a single not expression.
