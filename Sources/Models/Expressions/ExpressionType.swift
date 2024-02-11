@@ -7,4 +7,5 @@ enum ExpressionType {
   case not
   case block
   case variableDeclaration
+  case whileExpression
 }

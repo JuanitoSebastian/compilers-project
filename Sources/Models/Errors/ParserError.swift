@@ -9,4 +9,5 @@ enum ParserError: Error, Equatable {
   case varDeclarationMissingExpression(token: Token? = nil)
   case varDeclarationInvalid(token: Token? = nil)
   case varDeclarationUnsupportedType(token: Token? = nil)
+  case whileExpressionMissingCondition
 }

@@ -326,6 +326,25 @@ extension ParserTests {
       XCTAssertNoThrow(try parser.parse())
     }
   }
+
+  func test_parsing_while_expression() throws {
+    var tokenizer = Tokenizer(input: "while true do { a = a + 1; }")
+    tokenizer.tokenize()
+    var parser = Parser(tokens: tokenizer.tokens)
+    let whileExpression = ParserHelper<WhileExpression>(try parser.parse()[0])!.e
+    XCTAssertEqual(
+      whileExpression,
+      WhileExpression(
+        condition: LiteralExpression(value: true),
+        body: BlockExpression(
+          statements: [
+            BinaryOpExpression(
+              left: IdentifierExpression(value: "a"), op: "=",
+              right: BinaryOpExpression(
+                left: IdentifierExpression(value: "a"), op: "+", right: LiteralExpression(value: 1))
+            )
+          ], resultExpression: nil)))
+  }
 }
 
 struct ParserHelper<T: Expression> {
