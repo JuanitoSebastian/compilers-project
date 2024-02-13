@@ -17,6 +17,8 @@ struct Typechecker {
       return try typecheckBlockExpression(blockExpression)
     case let ifExpression as IfExpression:
       return try typecheckIfExpression(ifExpression)
+    case let whileExpression as WhileExpression:
+      return try typecheckWhileExpression(whileExpression)
     default:
       fatalError("Unsupported expression type: \(type(of: expression))")
     }
@@ -112,7 +114,16 @@ extension Typechecker {
     }
 
     return thenType
+  }
 
+  private mutating func typecheckWhileExpression(_ expression: WhileExpression) throws -> Type {
+    let conditionType = try typecheck(expression.condition)
+    guard conditionType == .bool else {
+      throw TypecheckerError.inaproppriateType(expected: .bool, got: [conditionType])
+    }
+
+    _ = try typecheck(expression.body)
+    return .unit
   }
 
 }

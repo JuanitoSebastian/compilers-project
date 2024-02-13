@@ -98,7 +98,24 @@ final class TypechkerTests: XCTestCase {
         TypecheckerError.inaproppriateType(expected: .int, got: [.bool])
       )
     }
+  }
 
+  func test_typecheck_while_expression() throws {
+    var typechecker = Typechecker()
+    let expression = try toExpression("while 4 > 2 do { var x = 2; }") as! WhileExpression
+    let type = try typechecker.typecheck(expression)
+    XCTAssertEqual(type, Type.unit)
+  }
+
+  func test_typecheck_while_expression_invalid_condition_throws() throws {
+    var typechecker = Typechecker()
+    let expression = try! toExpression("while 4 * 2 do { var x = 2; }") as! WhileExpression
+    XCTAssertThrowsError(try typechecker.typecheck(expression)) { error in
+      XCTAssertEqual(
+        error as? TypecheckerError,
+        TypecheckerError.inaproppriateType(expected: .bool, got: [.int])
+      )
+    }
   }
 }
 
