@@ -1,5 +1,3 @@
-import Foundation
-
 struct Tokenizer {
   let input: String
   let file: String?
