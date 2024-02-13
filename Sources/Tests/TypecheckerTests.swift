@@ -70,6 +70,36 @@ final class TypechkerTests: XCTestCase {
       )
     }
   }
+
+  func test_typecheck_if_expression() throws {
+    var typechecker = Typechecker()
+    let expression = try toExpression("if 4 > 2 then { 1 } else { 2 }") as! IfExpression
+    let type = try typechecker.typecheck(expression)
+    XCTAssertEqual(type, Type.int)
+  }
+
+  func test_typecheck_if_expression_invalid_condition_throws() throws {
+    var typechecker = Typechecker()
+    let expression = try! toExpression("if 4 * 2 then { 1 }") as! IfExpression
+    XCTAssertThrowsError(try typechecker.typecheck(expression)) { error in
+      XCTAssertEqual(
+        error as? TypecheckerError,
+        TypecheckerError.inaproppriateType(expected: .bool, got: [.int])
+      )
+    }
+  }
+
+  func test_typecheck_if_expression_unequal_then_and_else_types_throws() throws {
+    var typechecker = Typechecker()
+    let expression = try! toExpression("if 4 > 2 then { 1 } else { true }") as! IfExpression
+    XCTAssertThrowsError(try typechecker.typecheck(expression)) { error in
+      XCTAssertEqual(
+        error as? TypecheckerError,
+        TypecheckerError.inaproppriateType(expected: .int, got: [.bool])
+      )
+    }
+
+  }
 }
 
 extension TypechkerTests {

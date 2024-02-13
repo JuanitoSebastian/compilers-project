@@ -15,11 +15,15 @@ struct Typechecker {
       return try typecheckVarDeclarationExpression(varDeclarationExpression)
     case let blockExpression as BlockExpression:
       return try typecheckBlockExpression(blockExpression)
+    case let ifExpression as IfExpression:
+      return try typecheckIfExpression(ifExpression)
     default:
       fatalError("Unsupported expression type: \(type(of: expression))")
     }
   }
+}
 
+extension Typechecker {
   mutating private func typecheckBinaryOpExpression(
     _ expression: BinaryOpExpression
   ) throws -> Type {
@@ -90,6 +94,25 @@ struct Typechecker {
     }
 
     return .unit
+  }
+
+  private mutating func typecheckIfExpression(_ expression: IfExpression) throws -> Type {
+    let conditionType = try typecheck(expression.condition)
+    guard conditionType == .bool else {
+      throw TypecheckerError.inaproppriateType(expected: .bool, got: [conditionType])
+    }
+
+    let thenType = try typecheck(expression.thenExpression)
+
+    if let elseExpression = expression.elseExpression {
+      let elseType = try typecheck(elseExpression)
+      guard thenType == elseType else {
+        throw TypecheckerError.inaproppriateType(expected: thenType, got: [elseType])
+      }
+    }
+
+    return thenType
+
   }
 
 }
