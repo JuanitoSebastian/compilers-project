@@ -1,6 +1,6 @@
 struct Location: CustomStringConvertible, Equatable {
   let file: String?
-  let position: Range<String.Index>?
+  let range: Range<String.Index>?
   let line: Int?
 
   var description: String {
@@ -11,6 +11,6 @@ struct Location: CustomStringConvertible, Equatable {
     if lhs.file == nil && rhs.file == nil {
       return lhs.line == rhs.line
     }
-    return lhs.file == rhs.file && lhs.position == rhs.position && lhs.line == rhs.line
+    return lhs.file == rhs.file && lhs.range == rhs.range && lhs.line == rhs.line
   }
 }

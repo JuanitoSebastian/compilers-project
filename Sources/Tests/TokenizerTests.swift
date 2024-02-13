@@ -6,7 +6,7 @@ import XCTest
 
 // swiftlint:disable:next identifier_name
 func L(_ line: Int) -> Location {
-  return Location(file: nil, position: nil, line: line)
+  return Location(file: nil, range: nil, line: line)
 }
 
 final class TokenizerTests: XCTestCase {
@@ -189,7 +189,7 @@ final class TokenizerTests: XCTestCase {
     var tokenizer = Tokenizer(input: input)
     tokenizer.tokenize()
     for token in tokenizer.tokens {
-      let range = token.location.position!
+      let range = token.location.range!
       XCTAssertEqual(token.value, String(input[range]))
     }
   }

@@ -39,7 +39,7 @@ struct Tokenizer {
         return Token(
           type: tokenType,
           value: matcher.matchedString,
-          location: Location(file: file, position: range, line: line)
+          location: Location(file: file, range: range, line: line)
         )
       }
     }
