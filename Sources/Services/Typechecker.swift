@@ -18,16 +18,22 @@ struct Typechecker {
     }
   }
 
-  mutating private func typecheckBinaryOpExpression(_ expression: BinaryOpExpression) throws -> Type
-  {
+  mutating private func typecheckBinaryOpExpression(
+    _ expression: BinaryOpExpression
+  ) throws -> Type {
     let leftType = try typecheck(expression.left)
     let rightType = try typecheck(expression.right)
 
-    if ["+", "-", "*", "/", "%", "<", "<=", ">", ">=", "==", "!="].contains(expression.op) {
+    guard leftType == rightType else {
+      throw TypecheckerError.inaproppriateType(expected: leftType, got: [rightType])
+    }
+
+    if ["+", "-", "*", "/", "%", "<", "<=", ">", ">="].contains(expression.op) {
       guard leftType == .int && rightType == .int else {
-        throw TypecheckerError.inaproppriateType(expected: .int, got: [leftType, rightType])
+        throw TypecheckerError.inaproppriateType(expected: .int, got: [leftType])
       }
-      return .int
+
+      return ["+", "-", "*", "/", "%"].contains(expression.op) ? .int : .bool
     }
 
     if ["and", "or"].contains(expression.op) {
@@ -38,9 +44,6 @@ struct Typechecker {
     }
 
     if expression.op == "=" {
-      guard leftType == rightType else {
-        throw TypecheckerError.inaproppriateType(expected: leftType, got: [rightType])
-      }
       return .unit
     }
 
@@ -55,10 +58,9 @@ struct Typechecker {
     return type
   }
 
-  private mutating func typecheckVarDeclarationExpression(_ expression: VarDeclarationExpression)
-    throws
-    -> Type
-  {
+  private mutating func typecheckVarDeclarationExpression(
+    _ expression: VarDeclarationExpression
+  ) throws -> Type {
     let variableName = expression.variableIdentifier.value
     let type = try typecheck(expression.variableValue)
     if let typeDeclaration = expression.variableType {
