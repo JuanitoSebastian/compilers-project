@@ -20,6 +20,8 @@ struct Typechecker {
       return try typecheckIfExpression(ifExpression)
     case let whileExpression as WhileExpression:
       return try typecheckWhileExpression(whileExpression)
+    case let notExpression as NotExpression:
+      return try typecheckNotExpression(notExpression)
     default:
       fatalError("Unsupported expression type: \(type(of: expression))")
     }
@@ -35,7 +37,7 @@ extension Typechecker {
 
     if expression.op == "=" {
       guard leftType == rightType else {
-        throw TypecheckerError.inaproppriateType(expected: leftType, got: [rightType])
+        throw TypecheckerError.inaproppriateType(expected: [leftType], got: [rightType])
       }
       return .unit
     }
@@ -45,7 +47,7 @@ extension Typechecker {
     }
 
     guard expectedTypes.params == [leftType, rightType] else {
-      throw TypecheckerError.inaproppriateFuncParams(
+      throw TypecheckerError.inaproppriateType(
         expected: expectedTypes.params, got: [leftType, rightType]
       )
     }
@@ -68,7 +70,7 @@ extension Typechecker {
     let type = try typecheck(expression.variableValue)
     if let typeDeclaration = expression.variableType {
       guard type == typeDeclaration else {
-        throw TypecheckerError.inaproppriateType(expected: typeDeclaration, got: [type])
+        throw TypecheckerError.inaproppriateType(expected: [typeDeclaration], got: [type])
       }
     }
 
@@ -96,7 +98,7 @@ extension Typechecker {
   private mutating func typecheckIfExpression(_ expression: IfExpression) throws -> Type {
     let conditionType = try typecheck(expression.condition)
     guard conditionType == .bool else {
-      throw TypecheckerError.inaproppriateType(expected: .bool, got: [conditionType])
+      throw TypecheckerError.inaproppriateType(expected: [.bool], got: [conditionType])
     }
 
     let thenType = try typecheck(expression.thenExpression)
@@ -104,7 +106,7 @@ extension Typechecker {
     if let elseExpression = expression.elseExpression {
       let elseType = try typecheck(elseExpression)
       guard thenType == elseType else {
-        throw TypecheckerError.inaproppriateType(expected: thenType, got: [elseType])
+        throw TypecheckerError.inaproppriateType(expected: [thenType], got: [elseType])
       }
     }
 
@@ -114,11 +116,21 @@ extension Typechecker {
   private mutating func typecheckWhileExpression(_ expression: WhileExpression) throws -> Type {
     let conditionType = try typecheck(expression.condition)
     guard conditionType == .bool else {
-      throw TypecheckerError.inaproppriateType(expected: .bool, got: [conditionType])
+      throw TypecheckerError.inaproppriateType(expected: [.bool], got: [conditionType])
     }
 
     _ = try typecheck(expression.body)
     return .unit
+  }
+
+  private mutating func typecheckNotExpression(_ expression: NotExpression) throws -> Type {
+    let type = try typecheck(expression.value)
+
+    guard type == .bool || type == .int else {
+      throw TypecheckerError.inaproppriateType(expected: [.bool, .int], got: [type])
+    }
+
+    return type
   }
 
 }

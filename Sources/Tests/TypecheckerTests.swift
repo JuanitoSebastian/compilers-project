@@ -38,7 +38,7 @@ final class TypechkerTests: XCTestCase {
     XCTAssertThrowsError(try typechecker.typecheck(expression.statements[0])) { error in
       XCTAssertEqual(
         error as? TypecheckerError,
-        TypecheckerError.inaproppriateType(expected: .int, got: [.bool])
+        TypecheckerError.inaproppriateType(expected: [.int], got: [.bool])
       )
     }
   }
@@ -55,7 +55,7 @@ final class TypechkerTests: XCTestCase {
     XCTAssertThrowsError(try typechecker.typecheck(expression)) { error in
       XCTAssertEqual(
         error as? TypecheckerError,
-        TypecheckerError.inaproppriateType(expected: .int, got: [.bool])
+        TypecheckerError.inaproppriateType(expected: [.int], got: [.bool])
       )
     }
   }
@@ -84,7 +84,7 @@ final class TypechkerTests: XCTestCase {
     XCTAssertThrowsError(try typechecker.typecheck(expression)) { error in
       XCTAssertEqual(
         error as? TypecheckerError,
-        TypecheckerError.inaproppriateType(expected: .bool, got: [.int])
+        TypecheckerError.inaproppriateType(expected: [.bool], got: [.int])
       )
     }
   }
@@ -95,7 +95,7 @@ final class TypechkerTests: XCTestCase {
     XCTAssertThrowsError(try typechecker.typecheck(expression)) { error in
       XCTAssertEqual(
         error as? TypecheckerError,
-        TypecheckerError.inaproppriateType(expected: .int, got: [.bool])
+        TypecheckerError.inaproppriateType(expected: [.int], got: [.bool])
       )
     }
   }
@@ -113,8 +113,32 @@ final class TypechkerTests: XCTestCase {
     XCTAssertThrowsError(try typechecker.typecheck(expression)) { error in
       XCTAssertEqual(
         error as? TypecheckerError,
-        TypecheckerError.inaproppriateType(expected: .bool, got: [.int])
+        TypecheckerError.inaproppriateType(expected: [.bool], got: [.int])
       )
+    }
+  }
+
+  func test_typecheck_not_expression() throws {
+    var typechecker = Typechecker()
+    let boolExpression = try toExpression("not true") as! NotExpression
+    let intExpression = try toExpression("not not not 1") as! NotExpression
+    let blockExpression = try toExpression("not { var x = 2; x }") as! NotExpression
+    let boolType = try typechecker.typecheck(boolExpression)
+    let intType = try typechecker.typecheck(intExpression)
+    let blockType = try typechecker.typecheck(blockExpression)
+    XCTAssertEqual(boolType, Type.bool)
+    XCTAssertEqual(intType, Type.int)
+    XCTAssertEqual(blockType, Type.int)
+  }
+
+  func test_typecheck_invalid_not_expression_throws() throws {
+    var typechecker = Typechecker()
+    XCTAssertThrowsError(try typechecker.typecheck(toExpression("not { var x = 2; }"))) { error in
+      XCTAssertEqual(
+        error as? TypecheckerError,
+        TypecheckerError.inaproppriateType(expected: [Type.bool, Type.int], got: [Type.unit])
+      )
+
     }
   }
 }
