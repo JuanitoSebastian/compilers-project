@@ -22,6 +22,8 @@ struct Typechecker {
       return try typecheckWhileExpression(whileExpression)
     case let notExpression as NotExpression:
       return try typecheckNotExpression(notExpression)
+    case let functionCallExpression as FunctionCallExpression:
+      return try typecheckFunctionCallExpression(functionCallExpression)
     default:
       fatalError("Unsupported expression type: \(type(of: expression))")
     }
@@ -131,6 +133,30 @@ extension Typechecker {
     }
 
     return type
+  }
+
+  private mutating func typecheckFunctionCallExpression(_ expression: FunctionCallExpression) throws
+    -> Type
+  {
+    guard let expectedTypes = funcTypesTab.lookup(expression.identifier.value) else {
+      throw TypecheckerError.referenceToUndefinedIdentifier(identifier: expression.identifier.value)
+    }
+
+    guard expression.arguments.count == expectedTypes.params.count else {
+      throw TypecheckerError.wrongNumberOfArguments(
+        expected: expectedTypes.params.count, got: expression.arguments.count
+      )
+    }
+
+    for (index, argument) in expression.arguments.enumerated() {
+      let argumentType = try typecheck(argument)
+      guard argumentType == expectedTypes.params[index] else {
+        throw TypecheckerError.inaproppriateType(
+          expected: [expectedTypes.params[index]], got: [argumentType])
+      }
+    }
+
+    return expectedTypes.returns
   }
 
 }

@@ -141,6 +141,29 @@ final class TypechkerTests: XCTestCase {
 
     }
   }
+
+  func test_typecheck_function_call_expression() throws {
+    var typechecker = Typechecker()
+    let printIntExpression = try toExpression("print_int(1)")
+    var type = try typechecker.typecheck(printIntExpression)
+    XCTAssertEqual(type, Type.unit)
+    let printBoolExpression = try toExpression("print_bool(true)")
+    type = try typechecker.typecheck(printBoolExpression)
+    XCTAssertEqual(type, Type.unit)
+    let readIntExpression = try toExpression("read_int()")
+    type = try typechecker.typecheck(readIntExpression)
+    XCTAssertEqual(type, Type.int)
+  }
+
+  func test_typecheck_unkown_function_call_expression_throws() throws {
+    var typechecker = Typechecker()
+    XCTAssertThrowsError(try typechecker.typecheck(toExpression("print(1)"))) { error in
+      XCTAssertEqual(
+        error as? TypecheckerError,
+        TypecheckerError.referenceToUndefinedIdentifier(identifier: "print")
+      )
+    }
+  }
 }
 
 extension TypechkerTests {
