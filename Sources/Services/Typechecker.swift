@@ -13,8 +13,10 @@ struct Typechecker {
       return try typecheckIdentifierExpression(identifierExpression)
     case let varDeclarationExpression as VarDeclarationExpression:
       return try typecheckVarDeclarationExpression(varDeclarationExpression)
+    case let blockExpression as BlockExpression:
+      return try typecheckBlockExpression(blockExpression)
     default:
-      fatalError("Unsupported")
+      fatalError("Unsupported expression type: \(type(of: expression))")
     }
   }
 
@@ -75,6 +77,18 @@ struct Typechecker {
     }
 
     symTab.insert(type, for: variableName)
+    return .unit
+  }
+
+  private mutating func typecheckBlockExpression(_ expression: BlockExpression) throws -> Type {
+    for statement in expression.statements {
+      _ = try typecheck(statement)
+    }
+
+    if let resultExpression = expression.resultExpression {
+      return try typecheck(resultExpression)
+    }
+
     return .unit
   }
 
