@@ -1,5 +1,6 @@
 struct Typechecker {
   var symTab: SymTab<Type> = SymTab()
+  var funcTypesTab: SymTab<(params: [Type], returns: Type)> = SymTab(builtInFuncTypes)
 
   mutating func typecheck(_ expression: (any Expression)) throws -> Type {
     switch expression {
@@ -32,30 +33,24 @@ extension Typechecker {
     let leftType = try typecheck(expression.left)
     let rightType = try typecheck(expression.right)
 
-    guard leftType == rightType else {
-      throw TypecheckerError.inaproppriateType(expected: leftType, got: [rightType])
-    }
-
-    if ["+", "-", "*", "/", "%", "<", "<=", ">", ">="].contains(expression.op) {
-      guard leftType == .int && rightType == .int else {
-        throw TypecheckerError.inaproppriateType(expected: .int, got: [leftType])
-      }
-
-      return ["+", "-", "*", "/", "%"].contains(expression.op) ? .int : .bool
-    }
-
-    if ["and", "or"].contains(expression.op) {
-      guard leftType == .bool && rightType == .bool else {
-        throw TypecheckerError.inaproppriateType(expected: .bool, got: [leftType, rightType])
-      }
-      return .bool
-    }
-
     if expression.op == "=" {
+      guard leftType == rightType else {
+        throw TypecheckerError.inaproppriateType(expected: leftType, got: [rightType])
+      }
       return .unit
     }
 
-    throw TypecheckerError.unsupportedOperator(op: expression.op)
+    guard let expectedTypes = funcTypesTab.lookup(expression.op) else {
+      throw TypecheckerError.unsupportedOperator(op: expression.op)
+    }
+
+    guard expectedTypes.params == [leftType, rightType] else {
+      throw TypecheckerError.inaproppriateFuncParams(
+        expected: expectedTypes.params, got: [leftType, rightType]
+      )
+    }
+
+    return expectedTypes.returns
   }
 
   private func typecheckIdentifierExpression(_ expression: IdentifierExpression) throws -> Type {
