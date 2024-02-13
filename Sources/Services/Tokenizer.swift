@@ -16,8 +16,8 @@ struct Tokenizer {
     var line = 0
     while positionIndex < input.endIndex {
       if let token = match(
-        input[positionIndex...], positionIndex: positionIndex, line: line)
-      {
+        input[positionIndex...], positionIndex: positionIndex, line: line
+      ) {
         if token.type != .lineComment && token.type != .newLine { tokens.append(token) }
         if token.type == .lineComment || token.type == .newLine { line += 1 }
         positionIndex = input.index(positionIndex, offsetBy: token.value.count)
@@ -34,7 +34,8 @@ struct Tokenizer {
           uncheckedBounds: (
             lower: positionIndex,
             upper: input.base.index(positionIndex, offsetBy: matcher.matchedString.count)
-          ))
+          )
+        )
         return Token(
           type: tokenType,
           value: matcher.matchedString,
