@@ -117,7 +117,10 @@ struct Parser {
       }
       if let next = peek(), next.value == "(" {
         let parameters = try parseFunctionCallParameters()
-        return FunctionCallExpression(identifier: left, arguments: parameters)
+        let location = try Location.combineLocations(
+          lhs: left.location, rhs: parameters.last?.location
+        )
+        return FunctionCallExpression(identifier: left, arguments: parameters, location: location)
       }
     }
 
