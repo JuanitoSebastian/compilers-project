@@ -71,7 +71,7 @@ final class ParserTests: XCTestCase {
     XCTAssertThrowsError(try parser.parse()) { error in
       XCTAssertEqual(
         error as? ParserError,
-        ParserError.noTokenFound(precedingToken: Token(type: .op, value: "+", location: L(0))))
+        ParserError.noTokenFound(precedingToken: Token(type: .op, value: "+", location: L(0, 6))))
     }
   }
 
@@ -82,7 +82,7 @@ final class ParserTests: XCTestCase {
     XCTAssertThrowsError(try parser.parse()) { error in
       XCTAssertEqual(
         error as? ParserError,
-        ParserError.noTokenFound(precedingToken: Token(type: .op, value: "*", location: L(0))))
+        ParserError.noTokenFound(precedingToken: Token(type: .op, value: "*", location: L(0, 6))))
     }
   }
 
@@ -94,7 +94,7 @@ final class ParserTests: XCTestCase {
       XCTAssertEqual(
         error as? ParserError,
         ParserError.unexpectedTokenType(
-          token: Token(type: .punctuation, value: ")", location: L(0)),
+          token: Token(type: .punctuation, value: ")", location: L(0, 1)),
           expected: [TokenType.integerLiteral, TokenType.identifier]))
     }
   }
