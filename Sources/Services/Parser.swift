@@ -17,7 +17,7 @@ struct Parser {
 
   private func peek(_ positionToPeek: Int? = nil) -> Token? {
     let index = positionToPeek ?? position
-    return index < tokens.count && index >= 0 ? tokens[index] : nil
+    return tokens.indices.contains(index) ? tokens[index] : nil
   }
 
   private mutating func consume(_ expected: String...) throws -> Token {
