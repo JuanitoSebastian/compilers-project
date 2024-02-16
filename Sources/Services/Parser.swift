@@ -102,8 +102,14 @@ struct Parser {
           throw ParserError.noTokenFound(precedingToken: op)
         }
 
+        let location = try Location.combineLocations(
+          lhs: left.location, rhs: right.location
+        )
+
         return try parseExpression(
-          previousExpression: BinaryOpExpression(left: left, op: op.value, right: right))
+          previousExpression: BinaryOpExpression(
+            left: left, op: op.value, right: right, location: location)
+        )
       }
     }
 
