@@ -3,6 +3,16 @@ struct BinaryOpExpression: Equatable, Expression, CustomStringConvertible {
   let left: any Expression
   let op: String
   let right: any Expression
+  let location: Location?
+
+  init(
+    left: any Expression, op: String, right: any Expression, location: Location? = nil
+  ) {
+    self.left = left
+    self.op = op
+    self.right = right
+    self.location = location
+  }
 
   static func == (lhs: BinaryOpExpression, rhs: BinaryOpExpression) -> Bool {
     return areExpressionsEqual(lhs.left, rhs.left)

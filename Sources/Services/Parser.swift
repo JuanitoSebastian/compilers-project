@@ -109,13 +109,12 @@ struct Parser {
 
     if let left = left as? IdentifierExpression {
       if left.value == "var" {
-        return try parseVarDeclaration()
+        return try parseVarDeclaration(varIdentifier: left)
       }
 
       if left.value == "while" {
-        return try parseWhileExpression()
+        return try parseWhileExpression(whileIdenfitier: left)
       }
-
       if let next = peek(), next.value == "(" {
         let parameters = try parseFunctionCallParameters()
         return FunctionCallExpression(identifier: left, arguments: parameters)
@@ -131,7 +130,7 @@ extension Parser {
 
   private mutating func parseBlockExpression() throws -> BlockExpression {
     // TODO: Make this better and more readable
-    _ = try consume("{")
+    let startBrace = try consume("{")
     let alreadyInBlock = isInsideBlock
     isInsideBlock = true
     var expressions: [(any Expression)] = []
@@ -155,11 +154,16 @@ extension Parser {
       isInsideBlock = false
     }
 
-    _ = try consume("}")
-    return BlockExpression(statements: expressions, resultExpression: resultExpression)
+    let endBrace = try consume("}")
+    let location = try Location.combineLocations(lhs: startBrace?.location, rhs: endBrace?.location)
+    return BlockExpression(
+      statements: expressions, resultExpression: resultExpression, location: location
+    )
   }
 
-  private mutating func parseWhileExpression() throws -> WhileExpression {
+  private mutating func parseWhileExpression(
+    whileIdenfitier: IdentifierExpression
+  ) throws -> WhileExpression {
     guard let condition = try parseExpression() else {
       throw ParserError.whileExpressionMissingCondition
     }
@@ -167,11 +171,14 @@ extension Parser {
     _ = try consume("do")
 
     let body = try parseBlockExpression()
+    let location = try Location.combineLocations(lhs: whileIdenfitier.location, rhs: body.location)
 
-    return WhileExpression(condition: condition, body: body)
+    return WhileExpression(condition: condition, body: body, location: location)
   }
 
-  private mutating func parseVarDeclaration() throws -> VarDeclarationExpression {
+  private mutating func parseVarDeclaration(
+    varIdentifier: IdentifierExpression
+  ) throws -> VarDeclarationExpression {
     guard isInsideBlock else {
       throw ParserError.varDeclarationOutsideBlock()
     }
@@ -202,8 +209,13 @@ extension Parser {
       throw ParserError.varDeclarationMissingExpression()
     }
 
+    let location = try Location.combineLocations(
+      lhs: varIdentifier.location, rhs: valueExpression.location)
+
     return VarDeclarationExpression(
-      variableIdentifier: variableName, variableValue: valueExpression, variableType: variableType)
+      variableIdentifier: variableName, variableValue: valueExpression, variableType: variableType,
+      location: location
+    )
   }
 
   /// Parses a not expresison. Chained nots are parsed as a single not expression.
@@ -225,7 +237,9 @@ extension Parser {
       throw ParserError.noTokenFound(precedingToken: latestToken)
     }
 
-    return not ? NotExpression(value: value) : value
+    let location = try Location.combineLocations(lhs: latestToken?.location, rhs: value.location)
+
+    return not ? NotExpression(value: value, location: location) : value
   }
 
   /// Parses a literal expression. Currently supported Int and Bool literals.
@@ -242,7 +256,7 @@ extension Parser {
 
     _ = try? consume()
 
-    return LiteralExpression<T>(value: value)
+    return LiteralExpression<T>(value: value, location: token.location)
   }
 
   private mutating func parseIdentifier() throws -> IdentifierExpression? {
@@ -256,11 +270,11 @@ extension Parser {
 
     _ = try? consume()
 
-    return IdentifierExpression(value: token.value)
+    return IdentifierExpression(value: token.value, location: token.location)
   }
 
   private mutating func parseIfExpression() throws -> IfExpression {
-    _ = try consume("if")
+    let ifIdentifier = try consume("if")
     guard let condition = try parseExpression() else {
       throw ParserError.ifExpressionMissingCondition
     }
@@ -270,16 +284,29 @@ extension Parser {
       throw ParserError.ifExpressionMissingThenExpression
     }
 
-    var elseExpression: (any Expression)?
-
     if let token = peek(), token.value == "else" {
       _ = try consume("else")
-      elseExpression = try parseExpression()
+      let elseExpression = try parseExpression()
+      let location = try Location.combineLocations(
+        lhs: ifIdentifier?.location, rhs: elseExpression?.location
+      )
+      return IfExpression(
+        condition: condition,
+        thenExpression: thenExpression,
+        elseExpression: elseExpression,
+        location: location
+      )
     }
+
+    let location = try Location.combineLocations(
+      lhs: ifIdentifier?.location, rhs: thenExpression.location
+    )
 
     return IfExpression(
       condition: condition,
       thenExpression: thenExpression,
-      elseExpression: elseExpression)
+      elseExpression: nil,
+      location: location
+    )
   }
 }

@@ -3,14 +3,16 @@ struct VarDeclarationExpression: Expression, Equatable, CustomStringConvertible 
   let variableIdentifier: IdentifierExpression
   let variableValue: (any Expression)
   let variableType: Type?
+  let location: Location?
 
   init(
     variableIdentifier: IdentifierExpression, variableValue: (any Expression),
-    variableType: Type? = nil
+    variableType: Type? = nil, location: Location? = nil
   ) {
     self.variableIdentifier = variableIdentifier
     self.variableValue = variableValue
     self.variableType = variableType
+    self.location = location
   }
 
   static func == (lhs: VarDeclarationExpression, rhs: VarDeclarationExpression) -> Bool {

@@ -2,6 +2,16 @@ struct BlockExpression: Expression, Equatable, CustomStringConvertible {
   var expressionType: ExpressionType = .block
   let statements: [(any Expression)]
   let resultExpression: (any Expression)?
+  let location: Location?
+
+  init(
+    statements: [(any Expression)], resultExpression: (any Expression)?,
+    location: Location? = nil
+  ) {
+    self.statements = statements
+    self.resultExpression = resultExpression
+    self.location = location
+  }
 
   static func == (lhs: BlockExpression, rhs: BlockExpression) -> Bool {
     if lhs.statements.count == rhs.statements.count
