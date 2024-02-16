@@ -1,9 +1,9 @@
 func areExpressionsEqual(_ lhs: (any Expression)?, _ rhs: (any Expression)?) -> Bool {
-  guard let lhs = lhs, let rhs = rhs, lhs.type == rhs.type else {
+  guard let lhs = lhs, let rhs = rhs, lhs.expressionType == rhs.expressionType else {
     return lhs == nil && rhs == nil
   }
 
-  switch lhs.type {
+  switch lhs.expressionType {
   case .literal:
     if let left = lhs as? LiteralExpression<Int>, let right = rhs as? LiteralExpression<Int> {
       return left == right

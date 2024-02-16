@@ -1,5 +1,5 @@
 struct FunctionCallExpression: Expression, Equatable, CustomStringConvertible {
-  let type: ExpressionType = .functionCall
+  let expressionType: ExpressionType = .functionCall
   let identifier: IdentifierExpression
   let arguments: [any Expression]
 

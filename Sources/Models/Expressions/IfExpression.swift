@@ -1,5 +1,5 @@
 struct IfExpression: Expression, Equatable, CustomStringConvertible {
-  let type: ExpressionType = .ifExpression
+  let expressionType: ExpressionType = .ifExpression
 
   let condition: (any Expression)
   let thenExpression: (any Expression)

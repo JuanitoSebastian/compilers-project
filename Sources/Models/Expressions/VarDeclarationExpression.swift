@@ -1,5 +1,5 @@
 struct VarDeclarationExpression: Expression, Equatable, CustomStringConvertible {
-  let type: ExpressionType = .variableDeclaration
+  let expressionType: ExpressionType = .variableDeclaration
   let variableIdentifier: IdentifierExpression
   let variableValue: (any Expression)
   let variableType: Type?

@@ -1,5 +1,5 @@
 struct BinaryOpExpression: Equatable, Expression, CustomStringConvertible {
-  let type: ExpressionType = .binaryOp
+  let expressionType: ExpressionType = .binaryOp
   let left: any Expression
   let op: String
   let right: any Expression

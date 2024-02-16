@@ -1,5 +1,5 @@
 struct BlockExpression: Expression, Equatable, CustomStringConvertible {
-  var type: ExpressionType = .block
+  var expressionType: ExpressionType = .block
   let statements: [(any Expression)]
   let resultExpression: (any Expression)?
 
