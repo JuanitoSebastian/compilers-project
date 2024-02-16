@@ -5,4 +5,5 @@ enum TypecheckerError: Error, Equatable {
   case referenceToUndefinedIdentifier(identifier: String)
   case identifierAlreadyDeclared(identifier: String)
   case wrongNumberOfArguments(expected: Int, got: Int)
+  case unknownExpressionType(type: String)
 }

@@ -9,27 +9,27 @@ final class TypechkerTests: XCTestCase {
   func test_typecheck_literal_expression_int() throws {
     var typechecker = Typechecker()
     let expression = try toExpression("1 + 2 - 3")
-    let type = try typechecker.typecheck(expression)
-    XCTAssertEqual(type, Type.int)
+    let typedExpression = try typechecker.typecheck(expression)
+    XCTAssertEqual(typedExpression.type, Type.int)
   }
 
   func test_typecheck_literal_expression_bool() throws {
     var typechecker = Typechecker()
     let expression = try toExpression("1 + 2 - 3 > 4")
-    let type = try typechecker.typecheck(expression)
-    XCTAssertEqual(type, Type.bool)
+    let typedExpression = try typechecker.typecheck(expression)
+    XCTAssertEqual(typedExpression.type, Type.bool)
   }
 
   func test_typecheck_var_declaration_expression() throws {
     var typechecker = Typechecker()
     let expression = try toExpression("{ var x: Int = 1; }") as! BlockExpression
     let varExpression = expression.statements[0] as! VarDeclarationExpression
-    let varExpressionType = try typechecker.typecheck(varExpression)
-    let valueType = try typechecker.typecheck(varExpression.variableValue)
-    let identifierType = try typechecker.typecheck(varExpression.variableIdentifier)
-    XCTAssertEqual(varExpressionType, Type.unit)
-    XCTAssertEqual(valueType, Type.int)
-    XCTAssertEqual(identifierType, Type.int)
+    let varExpressionTyped = try typechecker.typecheck(varExpression)
+    let valueTyped = try typechecker.typecheck(varExpression.variableValue)
+    let identifierTyped = try typechecker.typecheck(varExpression.variableIdentifier)
+    XCTAssertEqual(varExpressionTyped.type, Type.unit)
+    XCTAssertEqual(valueTyped.type, Type.int)
+    XCTAssertEqual(identifierTyped.type, Type.int)
   }
 
   func test_typecheck_invalid_var_declaration_expression_throws() throws {
@@ -74,8 +74,8 @@ final class TypechkerTests: XCTestCase {
   func test_typecheck_if_expression() throws {
     var typechecker = Typechecker()
     let expression = try toExpression("if 4 > 2 then { 1 } else { 2 }") as! IfExpression
-    let type = try typechecker.typecheck(expression)
-    XCTAssertEqual(type, Type.int)
+    let typedExpression = try typechecker.typecheck(expression)
+    XCTAssertEqual(typedExpression.type, Type.int)
   }
 
   func test_typecheck_if_expression_invalid_condition_throws() throws {
@@ -103,8 +103,8 @@ final class TypechkerTests: XCTestCase {
   func test_typecheck_while_expression() throws {
     var typechecker = Typechecker()
     let expression = try toExpression("while 4 > 2 do { var x = 2; }") as! WhileExpression
-    let type = try typechecker.typecheck(expression)
-    XCTAssertEqual(type, Type.unit)
+    let typedExpression = try typechecker.typecheck(expression)
+    XCTAssertEqual(typedExpression.type, Type.unit)
   }
 
   func test_typecheck_while_expression_invalid_condition_throws() throws {
@@ -123,12 +123,12 @@ final class TypechkerTests: XCTestCase {
     let boolExpression = try toExpression("not true") as! NotExpression
     let intExpression = try toExpression("not not not 1") as! NotExpression
     let blockExpression = try toExpression("not { var x = 2; x }") as! NotExpression
-    let boolType = try typechecker.typecheck(boolExpression)
-    let intType = try typechecker.typecheck(intExpression)
-    let blockType = try typechecker.typecheck(blockExpression)
-    XCTAssertEqual(boolType, Type.bool)
-    XCTAssertEqual(intType, Type.int)
-    XCTAssertEqual(blockType, Type.int)
+    let boolExpressionTyped = try typechecker.typecheck(boolExpression)
+    let intExpressionTyped = try typechecker.typecheck(intExpression)
+    let blockExpressionTyped = try typechecker.typecheck(blockExpression)
+    XCTAssertEqual(boolExpressionTyped.type, Type.bool)
+    XCTAssertEqual(intExpressionTyped.type, Type.int)
+    XCTAssertEqual(blockExpressionTyped.type, Type.int)
   }
 
   func test_typecheck_invalid_not_expression_throws() throws {
@@ -145,14 +145,14 @@ final class TypechkerTests: XCTestCase {
   func test_typecheck_function_call_expression() throws {
     var typechecker = Typechecker()
     let printIntExpression = try toExpression("print_int(1)")
-    var type = try typechecker.typecheck(printIntExpression)
-    XCTAssertEqual(type, Type.unit)
+    var typedExpression = try typechecker.typecheck(printIntExpression)
+    XCTAssertEqual(typedExpression.type, Type.unit)
     let printBoolExpression = try toExpression("print_bool(true)")
-    type = try typechecker.typecheck(printBoolExpression)
-    XCTAssertEqual(type, Type.unit)
+    typedExpression = try typechecker.typecheck(printBoolExpression)
+    XCTAssertEqual(typedExpression.type, Type.unit)
     let readIntExpression = try toExpression("read_int()")
-    type = try typechecker.typecheck(readIntExpression)
-    XCTAssertEqual(type, Type.int)
+    typedExpression = try typechecker.typecheck(readIntExpression)
+    XCTAssertEqual(typedExpression.type, Type.int)
   }
 
   func test_typecheck_unkown_function_call_expression_throws() throws {

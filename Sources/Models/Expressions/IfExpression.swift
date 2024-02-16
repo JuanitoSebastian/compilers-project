@@ -1,9 +1,9 @@
 struct IfExpression: Expression, Equatable, CustomStringConvertible {
   let expressionType: ExpressionType = .ifExpression
 
-  let condition: (any Expression)
-  let thenExpression: (any Expression)
-  let elseExpression: (any Expression)?
+  var condition: (any Expression)
+  var thenExpression: (any Expression)
+  var elseExpression: (any Expression)?
 
   let location: Location?
   var type: Type?

@@ -1,9 +1,9 @@
 struct BinaryOpExpression: Equatable, Expression, CustomStringConvertible {
   let expressionType: ExpressionType = .binaryOp
-  let left: any Expression
+  var left: any Expression
   let op: String
-  let right: any Expression
-  let location: Location?
+  var right: any Expression
+  var location: Location?
   var type: Type?
 
   init(

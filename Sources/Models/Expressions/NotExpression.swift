@@ -1,6 +1,6 @@
 struct NotExpression: Expression, Equatable, CustomStringConvertible {
   var expressionType: ExpressionType = .not
-  let value: (any Expression)
+  var value: (any Expression)
   let location: Location?
   var type: Type?
 

@@ -1,7 +1,7 @@
 struct WhileExpression: Expression, Equatable, CustomStringConvertible {
   let expressionType: ExpressionType = .whileExpression
-  let condition: (any Expression)
-  let body: BlockExpression
+  var condition: (any Expression)
+  var body: BlockExpression
   let location: Location?
   var type: Type?
 
