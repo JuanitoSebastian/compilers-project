@@ -236,7 +236,7 @@ extension ParserTests {
         ], resultExpression: nil))
   }
 
-  func test_parse_variable_declaration_in_block() throws {
+  func test_parse_variable_declaration() throws {
     var tokenizer = Tokenizer(input: "{ var a = 1 + 2 - 3; }")
     tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
@@ -253,21 +253,6 @@ extension ParserTests {
               op: "-", right: LiteralExpression(value: 3)),
             variableType: nil)
         ], resultExpression: nil))
-  }
-
-  func test_parser_throws_when_var_declaration_outside_block() throws {
-    let input = """
-      {
-        foo(1, 2);
-      }
-      var a = 1 + 2 - 3;
-      """
-    var tokenizer = Tokenizer(input: input)
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
-    XCTAssertThrowsError(try parser.parse()) { error in
-      XCTAssertEqual(error as? ParserError, ParserError.varDeclarationOutsideBlock())
-    }
   }
 
   func test_parse_variable_expression_with_type() throws {

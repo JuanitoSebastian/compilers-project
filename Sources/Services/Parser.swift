@@ -17,16 +17,29 @@ struct Parser {
 
   private func peek(_ positionToPeek: Int? = nil) -> Token? {
     let index = positionToPeek ?? position
-    return index < tokens.count ? tokens[index] : nil
+    return index < tokens.count && index >= 0 ? tokens[index] : nil
   }
 
-  private mutating func consume(_ expected: String...) throws -> Token? {
+  private mutating func consume(_ expected: String...) throws -> Token {
     guard let token = peek() else {
-      return nil
+      throw ParserError.noTokenFound(precedingToken: peek(position - 1))
     }
 
     if expected.count > 0 && !expected.contains(token.value) {
       throw ParserError.unexpectedTokenValue(token: token, expected: expected)
+    }
+
+    position += 1
+    return token
+  }
+
+  private mutating func consume(_ exptected: TokenType) throws -> Token {
+    guard let token = peek() else {
+      throw ParserError.noTokenFound(precedingToken: peek(position - 1))
+    }
+
+    if token.type != exptected {
+      throw ParserError.unexpectedTokenType(token: token, expected: [exptected])
     }
 
     position += 1
@@ -56,13 +69,16 @@ struct Parser {
 
     switch token.type {
     case .integerLiteral:
-      let literal: LiteralExpression<Int> = try parseLiteral(token.type)
+      _ = try consume(token.value)
+      let literal: LiteralExpression<Int> = try parseLiteral(token)
       return literal
     case .booleanLiteral:
-      let literal: LiteralExpression<Bool> = try parseLiteral(token.type)
+      _ = try consume(token.value)
+      let literal: LiteralExpression<Bool> = try parseLiteral(token)
       return literal
     case .identifier:
-      return try parseIdentifier()
+      _ = try consume(token.value)
+      return try parseIdentifier(token)
     default:
       throw ParserError.unexpectedTokenType(token: token, expected: [.integerLiteral, .identifier])
     }
@@ -164,7 +180,7 @@ extension Parser {
     }
 
     let endBrace = try consume("}")
-    let location = try Location.combineLocations(lhs: startBrace?.location, rhs: endBrace?.location)
+    let location = try Location.combineLocations(lhs: startBrace.location, rhs: endBrace.location)
     return BlockExpression(
       statements: expressions, resultExpression: resultExpression, location: location
     )
@@ -188,34 +204,28 @@ extension Parser {
   private mutating func parseVarDeclaration(
     varIdentifier: IdentifierExpression
   ) throws -> VarDeclarationExpression {
-    guard isInsideBlock else {
-      throw ParserError.varDeclarationOutsideBlock()
-    }
-
-    guard let variableName = try parseIdentifier() else {
-      throw ParserError.varDeclarationInvalid()
-    }
+    let variableName = try parseIdentifier(consume(.identifier))
 
     var variableType: Type?
     if let token = peek(), token.value == ":" {
       _ = try consume()
-      guard let typeIdentifierExpression = try parseIdentifier() else {
-        throw ParserError.varDeclarationInvalid()
-      }
+      let typeIdentifierExpression = try parseIdentifier(consume(.identifier))
       switch typeIdentifierExpression.value {
       case "Int":
         variableType = .int
       case "Bool":
         variableType = .bool
       default:
-        throw ParserError.varDeclarationUnsupportedType()
+        throw ParserError.varDeclarationUnknownType(
+          varIdentifierExpression: typeIdentifierExpression
+        )
       }
     }
 
     _ = try consume("=")
 
     guard let valueExpression = try parseExpression(1) else {
-      throw ParserError.varDeclarationMissingExpression()
+      throw ParserError.varDeclarationMissingExpression(varIdentifierExpression: varIdentifier)
     }
 
     let location = try Location.combineLocations(
@@ -252,32 +262,22 @@ extension Parser {
   }
 
   /// Parses a literal expression. Currently supported Int and Bool literals.
-  private mutating func parseLiteral<T: LiteralExpressionValue>(_ expected: TokenType) throws
+  private mutating func parseLiteral<T: LiteralExpressionValue>(_ token: Token) throws
     -> LiteralExpression<T>
   {
-    guard let token = peek() else {
-      throw ParserError.noTokenFound(precedingToken: nil)
-    }
-
     guard let value = T(token.value) else {
-      throw ParserError.unexpectedTokenType(token: token, expected: [expected])
+      throw ParserError.failedToParseLiteralValue(
+        token: token, triedToParse: String(describing: T.self)
+      )
     }
-
-    _ = try? consume()
 
     return LiteralExpression<T>(value: value, location: token.location)
   }
 
-  private mutating func parseIdentifier() throws -> IdentifierExpression? {
-    guard let token = peek() else {
-      return nil
-    }
-
+  private mutating func parseIdentifier(_ token: Token) throws -> IdentifierExpression {
     guard token.type == .identifier else {
       throw ParserError.unexpectedTokenType(token: token, expected: [.identifier])
     }
-
-    _ = try? consume()
 
     return IdentifierExpression(value: token.value, location: token.location)
   }
@@ -285,19 +285,19 @@ extension Parser {
   private mutating func parseIfExpression() throws -> IfExpression {
     let ifIdentifier = try consume("if")
     guard let condition = try parseExpression() else {
-      throw ParserError.ifExpressionMissingCondition
+      throw ParserError.ifExpressionMissingCondition(ifIdentifierToken: ifIdentifier)
     }
 
     _ = try consume("then")
     guard let thenExpression = try parseExpression() else {
-      throw ParserError.ifExpressionMissingThenExpression
+      throw ParserError.ifExpressionMissingThenExpression(ifIdentifierToken: ifIdentifier)
     }
 
     if let token = peek(), token.value == "else" {
       _ = try consume("else")
       let elseExpression = try parseExpression()
       let location = try Location.combineLocations(
-        lhs: ifIdentifier?.location, rhs: elseExpression?.location
+        lhs: ifIdentifier.location, rhs: elseExpression?.location
       )
       return IfExpression(
         condition: condition,
@@ -308,7 +308,7 @@ extension Parser {
     }
 
     let location = try Location.combineLocations(
-      lhs: ifIdentifier?.location, rhs: thenExpression.location
+      lhs: ifIdentifier.location, rhs: thenExpression.location
     )
 
     return IfExpression(
