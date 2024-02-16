@@ -64,7 +64,9 @@ extension Typechecker {
 
     if expression.op == "=" {
       guard leftType == rightType else {
-        throw TypecheckerError.inaproppriateType(expected: [leftType], got: [rightType])
+        throw TypecheckerError.inaproppriateType(
+          expected: [leftType], got: [rightType], location: expression.location
+        )
       }
       return .unit
     }
@@ -75,7 +77,7 @@ extension Typechecker {
 
     guard expectedTypes.params == [leftType, rightType] else {
       throw TypecheckerError.inaproppriateType(
-        expected: expectedTypes.params, got: [leftType, rightType]
+        expected: expectedTypes.params, got: [leftType, rightType], location: expression.location
       )
     }
 
@@ -99,7 +101,8 @@ extension Typechecker {
     let type = try getAndSetTypes(&expression.variableValue)
     if let typeDeclaration = expression.variableType {
       guard type == typeDeclaration else {
-        throw TypecheckerError.inaproppriateType(expected: [typeDeclaration], got: [type])
+        throw TypecheckerError.inaproppriateType(
+          expected: [typeDeclaration], got: [type], location: expression.location)
       }
     }
 
@@ -128,7 +131,9 @@ extension Typechecker {
   private mutating func typecheckIfExpression(_ expression: inout IfExpression) throws -> Type {
     let conditionType = try getAndSetTypes(&expression.condition)
     guard conditionType == .bool else {
-      throw TypecheckerError.inaproppriateType(expected: [.bool], got: [conditionType])
+      throw TypecheckerError.inaproppriateType(
+        expected: [.bool], got: [conditionType], location: expression.condition.location
+      )
     }
 
     let thenType = try getAndSetTypes(&expression.thenExpression)
@@ -136,7 +141,9 @@ extension Typechecker {
     if var elseExpression = expression.elseExpression {
       let elseType = try getAndSetTypes(&elseExpression)
       guard thenType == elseType else {
-        throw TypecheckerError.inaproppriateType(expected: [thenType], got: [elseType])
+        throw TypecheckerError.inaproppriateType(
+          expected: [thenType], got: [elseType], location: expression.elseExpression?.location
+        )
       }
     }
 
@@ -147,7 +154,9 @@ extension Typechecker {
   {
     let conditionType = try getAndSetTypes(&expression.condition)
     guard conditionType == .bool else {
-      throw TypecheckerError.inaproppriateType(expected: [.bool], got: [conditionType])
+      throw TypecheckerError.inaproppriateType(
+        expected: [.bool], got: [conditionType], location: expression.condition.location
+      )
     }
     var body = expression.body as (any Expression)
     _ = try getAndSetTypes(&body)
@@ -158,7 +167,9 @@ extension Typechecker {
     let type = try getAndSetTypes(&expression.value)
 
     guard type == .bool || type == .int else {
-      throw TypecheckerError.inaproppriateType(expected: [.bool, .int], got: [type])
+      throw TypecheckerError.inaproppriateType(
+        expected: [.bool, .int], got: [type], location: expression.location
+      )
     }
 
     return type
@@ -182,7 +193,8 @@ extension Typechecker {
       let argumentType = try getAndSetTypes(&argument)
       guard argumentType == expectedTypes.params[index] else {
         throw TypecheckerError.inaproppriateType(
-          expected: [expectedTypes.params[index]], got: [argumentType])
+          expected: [expectedTypes.params[index]], got: [argumentType],
+          location: expression.location)
       }
     }
 

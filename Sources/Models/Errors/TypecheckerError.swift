@@ -1,5 +1,5 @@
 enum TypecheckerError: Error, Equatable {
-  case inaproppriateType(expected: [Type], got: [Type])
+  case inaproppriateType(expected: [Type], got: [Type], location: Location?)
   case inaproppriateOperatorForType(op: String, type: [Type])
   case unsupportedOperator(op: String)
   case referenceToUndefinedIdentifier(identifier: String)
