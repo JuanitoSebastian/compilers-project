@@ -1,3 +1,5 @@
+// TODO: Revisit these. Are all of these necessary? Add location information to all of them.
+
 enum ParserError: Error, Equatable {
   case unexpectedTokenValue(token: Token, expected: [String])
   case unexpectedTokenType(token: Token, expected: [TokenType])
