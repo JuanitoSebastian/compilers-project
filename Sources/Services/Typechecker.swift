@@ -52,7 +52,9 @@ extension Typechecker {
       return type
     default:
       let typeOfExpression = type(of: expression)
-      throw TypecheckerError.unknownExpressionType(type: "\(typeOfExpression)")
+      throw TypecheckerError.unknownExpressionType(
+        type: "\(typeOfExpression)", location: expression.location
+      )
     }
   }
 

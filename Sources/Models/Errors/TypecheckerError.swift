@@ -4,5 +4,5 @@ enum TypecheckerError: Error, Equatable {
   case referenceToUndefinedIdentifier(identifier: String, location: Location?)
   case identifierAlreadyDeclared(identifier: String, location: Location?)
   case wrongNumberOfArguments(expected: Int, got: Int, location: Location?)
-  case unknownExpressionType(type: String)
+  case unknownExpressionType(type: String, location: Location?)
 }
