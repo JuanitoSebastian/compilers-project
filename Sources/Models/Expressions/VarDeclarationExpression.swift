@@ -4,6 +4,7 @@ struct VarDeclarationExpression: Expression, Equatable, CustomStringConvertible 
   let variableValue: (any Expression)
   let variableType: Type?
   let location: Location?
+  var type: Type?
 
   init(
     variableIdentifier: IdentifierExpression, variableValue: (any Expression),

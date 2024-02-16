@@ -2,6 +2,7 @@ struct NotExpression: Expression, Equatable, CustomStringConvertible {
   var expressionType: ExpressionType = .not
   let value: (any Expression)
   let location: Location?
+  var type: Type?
 
   init(value: (any Expression), location: Location? = nil) {
     self.value = value

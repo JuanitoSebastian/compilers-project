@@ -3,6 +3,7 @@ struct FunctionCallExpression: Expression, Equatable, CustomStringConvertible {
   let identifier: IdentifierExpression
   let arguments: [any Expression]
   let location: Location?
+  var type: Type?
 
   init(
     identifier: IdentifierExpression, arguments: [any Expression], location: Location? = nil

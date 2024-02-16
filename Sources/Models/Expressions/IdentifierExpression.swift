@@ -2,6 +2,7 @@ struct IdentifierExpression: Expression, Equatable, CustomStringConvertible {
   let expressionType: ExpressionType = .identifier
   let value: String
   let location: Location?
+  var type: Type?
 
   init(value: String, location: Location? = nil) {
     self.value = value

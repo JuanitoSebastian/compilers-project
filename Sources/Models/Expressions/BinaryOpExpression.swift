@@ -4,6 +4,7 @@ struct BinaryOpExpression: Equatable, Expression, CustomStringConvertible {
   let op: String
   let right: any Expression
   let location: Location?
+  var type: Type?
 
   init(
     left: any Expression, op: String, right: any Expression, location: Location? = nil

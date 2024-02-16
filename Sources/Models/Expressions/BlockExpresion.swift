@@ -3,6 +3,7 @@ struct BlockExpression: Expression, Equatable, CustomStringConvertible {
   let statements: [(any Expression)]
   let resultExpression: (any Expression)?
   let location: Location?
+  var type: Type?
 
   init(
     statements: [(any Expression)], resultExpression: (any Expression)?,

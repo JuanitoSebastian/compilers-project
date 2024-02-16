@@ -6,6 +6,7 @@ struct IfExpression: Expression, Equatable, CustomStringConvertible {
   let elseExpression: (any Expression)?
 
   let location: Location?
+  var type: Type?
 
   init(
     condition: (any Expression), thenExpression: (any Expression),

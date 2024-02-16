@@ -3,6 +3,7 @@ where Element: LiteralExpressionValue, Element: Equatable {
   let expressionType: ExpressionType = .literal
   let value: Element
   let location: Location?
+  var type: Type?
 
   init(value: Element, location: Location? = nil) {
     self.value = value

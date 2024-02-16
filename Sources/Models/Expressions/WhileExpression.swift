@@ -3,6 +3,7 @@ struct WhileExpression: Expression, Equatable, CustomStringConvertible {
   let condition: (any Expression)
   let body: BlockExpression
   let location: Location?
+  var type: Type?
 
   init(
     condition: (any Expression), body: BlockExpression, location: Location? = nil
