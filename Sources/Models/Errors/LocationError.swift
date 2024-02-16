@@ -1,3 +1,3 @@
 enum LocationError: Error {
-  case combineFromDifferentFiles
+  case combineFromDifferentFiles(lhs: String?, rhs: String?)
 }

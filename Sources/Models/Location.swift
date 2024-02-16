@@ -23,7 +23,7 @@ struct Location: CustomStringConvertible, Equatable {
       return nil
     }
     guard lhs.file == rhs.file else {
-      throw LocationError.combineFromDifferentFiles
+      throw LocationError.combineFromDifferentFiles(lhs: lhs.file, rhs: rhs.file)
     }
     if let lhsRange = lhs.range, let rhsRange = rhs.range {
       let lowerBound = min(lhsRange.lowerBound, rhsRange.lowerBound)
