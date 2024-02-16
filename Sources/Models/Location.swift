@@ -1,15 +1,13 @@
 struct Location: CustomStringConvertible, Equatable {
   let file: String?
   let range: Range<String.Index>?
-  let line: Int?
-  let position: Int?
+  let line: Int
+  let position: Int
 
   var description: String {
     let fileDescription = file == nil ? "" : "file: \(file!), "
     let rangeDescription = range == nil ? "" : "range: \(range!), "
-    let lineDescription = line == nil ? "" : "line: \(line!), "
-    let positionDescription = position == nil ? "" : "position: \(position!)"
-    return "Location(\(fileDescription)\(rangeDescription)\(lineDescription)\(positionDescription))"
+    return "Location(\(fileDescription)\(rangeDescription)line: \(line), position: \(position))"
   }
 
   static func == (lhs: Location, rhs: Location) -> Bool {
