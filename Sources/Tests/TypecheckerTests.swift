@@ -66,7 +66,7 @@ final class TypechkerTests: XCTestCase {
     XCTAssertThrowsError(try typechecker.typecheck(expression)) { error in
       XCTAssertEqual(
         error as? TypecheckerError,
-        TypecheckerError.referenceToUndefinedIdentifier(identifier: "x")
+        TypecheckerError.referenceToUndefinedIdentifier(identifier: "x", location: L(0, 2))
       )
     }
   }
@@ -161,7 +161,7 @@ final class TypechkerTests: XCTestCase {
     XCTAssertThrowsError(try typechecker.typecheck(toExpression("print(1)"))) { error in
       XCTAssertEqual(
         error as? TypecheckerError,
-        TypecheckerError.referenceToUndefinedIdentifier(identifier: "print")
+        TypecheckerError.referenceToUndefinedIdentifier(identifier: "print", location: L(0, 0))
       )
     }
   }

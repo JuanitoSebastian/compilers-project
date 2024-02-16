@@ -88,7 +88,9 @@ extension Typechecker {
     -> Type
   {
     guard let type = symTab.lookup(expression.value) else {
-      throw TypecheckerError.referenceToUndefinedIdentifier(identifier: expression.value)
+      throw TypecheckerError.referenceToUndefinedIdentifier(
+        identifier: expression.value, location: expression.location
+      )
     }
 
     return type
@@ -180,7 +182,9 @@ extension Typechecker {
     -> Type
   {
     guard let expectedTypes = funcTypesTab.lookup(expression.identifier.value) else {
-      throw TypecheckerError.referenceToUndefinedIdentifier(identifier: expression.identifier.value)
+      throw TypecheckerError.referenceToUndefinedIdentifier(
+        identifier: expression.identifier.value, location: expression.location
+      )
     }
 
     guard expression.arguments.count == expectedTypes.params.count else {
