@@ -72,7 +72,7 @@ extension Typechecker {
     }
 
     guard let expectedTypes = funcTypesTab.lookup(expression.op) else {
-      throw TypecheckerError.unsupportedOperator(op: expression.op)
+      throw TypecheckerError.unsupportedOperator(op: expression.op, location: expression.location)
     }
 
     guard expectedTypes.params == [leftType, rightType] else {
