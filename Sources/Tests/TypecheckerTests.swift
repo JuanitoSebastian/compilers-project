@@ -166,6 +166,16 @@ final class TypechkerTests: XCTestCase {
     }
   }
 
+  func test_typecheck_wrong_number_of_args_in_function_call_throws() throws {
+    var typechecker = Typechecker()
+    XCTAssertThrowsError(try typechecker.typecheck(toExpression("print_int(1, 2)"))) { error in
+      XCTAssertEqual(
+        error as? TypecheckerError,
+        TypecheckerError.wrongNumberOfArguments(expected: 1, got: 2, location: L(0, 0))
+      )
+    }
+  }
+
   func test_typecheck_variable_already_declared_throws() throws {
     var typechecker = Typechecker()
     let expression = try! toExpression("{ var x: Int = 1; var x: Int = 2; }") as! BlockExpression

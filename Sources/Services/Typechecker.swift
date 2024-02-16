@@ -191,7 +191,8 @@ extension Typechecker {
 
     guard expression.arguments.count == expectedTypes.params.count else {
       throw TypecheckerError.wrongNumberOfArguments(
-        expected: expectedTypes.params.count, got: expression.arguments.count
+        expected: expectedTypes.params.count, got: expression.arguments.count,
+        location: expression.location
       )
     }
 
