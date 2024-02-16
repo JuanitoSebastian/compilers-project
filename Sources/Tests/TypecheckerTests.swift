@@ -165,6 +165,18 @@ final class TypechkerTests: XCTestCase {
       )
     }
   }
+
+  func test_typecheck_variable_already_declared_throws() throws {
+    var typechecker = Typechecker()
+    let expression = try! toExpression("{ var x: Int = 1; var x: Int = 2; }") as! BlockExpression
+    XCTAssertThrowsError(try typechecker.typecheck(expression)) { error in
+      XCTAssertEqual(
+        error as? TypecheckerError,
+        TypecheckerError.identifierAlreadyDeclared(identifier: "x", location: L(0, 18))
+      )
+    }
+
+  }
 }
 
 extension TypechkerTests {

@@ -110,7 +110,9 @@ extension Typechecker {
 
     guard symTab.lookup(variableName) == nil else {
       throw TypecheckerError.identifierAlreadyDeclared(
-        identifier: expression.variableIdentifier.value)
+        identifier: expression.variableIdentifier.value,
+        location: expression.location
+      )
     }
 
     symTab.insert(type, for: variableName)
