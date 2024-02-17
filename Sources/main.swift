@@ -1,16 +1,14 @@
 let input = """
-  {
-    a = 1 + 2 - 3;
-    if 2 > 4 then {
-      foo(a);
-    } else {
-      foo(1);
-    }
-  }
+  var a: Int = 1
   """
 var tokenizer = Tokenizer(input: input)
 try tokenizer.tokenize()
 var parser = Parser(tokens: tokenizer.tokens)
+var typechecker = Typechecker()
 var expression = try parser.parse()
-
-print(expression)
+  .compactMap { $0 }
+var unTypedExpression = expression[0]
+var typedExpression = try typechecker.typecheck(unTypedExpression)
+var irGenerator = IrGenerator(expressions: [typedExpression])
+try irGenerator.generate()
+print(irGenerator.instructions)
