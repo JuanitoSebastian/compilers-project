@@ -40,12 +40,12 @@ struct Tokenizer {
         let range = Range<String.Index>(
           uncheckedBounds: (
             lower: positionIndex,
-            upper: input.base.index(positionIndex, offsetBy: matcher.matchedString.count)
+            upper: input.base.index(positionIndex, offsetBy: matcher.match.count)
           )
         )
         return Token(
           type: tokenType,
-          value: matcher.matchedString,
+          value: matcher.match,
           location: Location(file: file, range: range, line: line, position: position)
         )
       }
