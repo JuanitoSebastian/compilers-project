@@ -2,13 +2,7 @@ struct Typechecker {
   var symTab: SymTab<Type> = SymTab()
   var funcTypesTab: SymTab<(params: [Type], returns: Type)> = SymTab(builtInFuncTypes)
 
-  mutating func typecheck(_ expression: (any Expression)) throws -> (any Expression) {
-    return try getAndSetTypes(expression)
-  }
-}
-
-extension Typechecker {
-  mutating private func getAndSetTypes(_ expression: (any Expression)) throws -> any Expression {
+  mutating func typecheck(_ expression: (any Expression)) throws -> any Expression {
     var expressionToReturn = expression
     switch expression {
     case _ as LiteralExpression<Int>:
@@ -40,13 +34,16 @@ extension Typechecker {
       )
     }
   }
+}
+
+extension Typechecker {
 
   mutating private func typecheckBinaryOpExpression(
     _ expression: BinaryOpExpression
   ) throws -> BinaryOpExpression {
     var typedExpression = expression
-    typedExpression.left = try getAndSetTypes(expression.left)
-    typedExpression.right = try getAndSetTypes(expression.right)
+    typedExpression.left = try typecheck(expression.left)
+    typedExpression.right = try typecheck(expression.right)
 
     if expression.op == "=" {
       guard typedExpression.left.type == typedExpression.right.type else {
@@ -93,7 +90,7 @@ extension Typechecker {
   ) throws -> VarDeclarationExpression {
     var typedExpression = expression
     let variableName = expression.variableIdentifier.value
-    typedExpression.variableValue = try getAndSetTypes(expression.variableValue)
+    typedExpression.variableValue = try typecheck(expression.variableValue)
     typedExpression.variableIdentifier.type = typedExpression.variableValue.type
 
     if let typeDeclaration = expression.variableType {
@@ -121,11 +118,11 @@ extension Typechecker {
   {
     var typedExpression = expression
     typedExpression.statements = try expression.statements.map { statement in
-      try getAndSetTypes(statement)
+      try typecheck(statement)
     }
 
     if let resultExpression = typedExpression.resultExpression {
-      typedExpression.resultExpression = try getAndSetTypes(resultExpression)
+      typedExpression.resultExpression = try typecheck(resultExpression)
     }
 
     typedExpression.type = typedExpression.resultExpression?.type ?? .unit
@@ -136,7 +133,7 @@ extension Typechecker {
     -> IfExpression
   {
     var typedExpression = expression
-    typedExpression.condition = try getAndSetTypes(typedExpression.condition)
+    typedExpression.condition = try typecheck(typedExpression.condition)
     guard typedExpression.condition.type == .bool else {
       throw TypecheckerError.inaproppriateType(
         expected: [.bool], got: [typedExpression.condition.type],
@@ -144,10 +141,10 @@ extension Typechecker {
       )
     }
 
-    typedExpression.thenExpression = try getAndSetTypes(typedExpression.thenExpression)
+    typedExpression.thenExpression = try typecheck(typedExpression.thenExpression)
 
     if let elseExpression = typedExpression.elseExpression {
-      typedExpression.elseExpression = try getAndSetTypes(elseExpression)
+      typedExpression.elseExpression = try typecheck(elseExpression)
       guard typedExpression.thenExpression.type == typedExpression.elseExpression?.type else {
         throw TypecheckerError.inaproppriateType(
           expected: [typedExpression.thenExpression.type],
@@ -165,7 +162,7 @@ extension Typechecker {
     -> WhileExpression
   {
     var typedExpression = expression
-    typedExpression.condition = try getAndSetTypes(typedExpression.condition)
+    typedExpression.condition = try typecheck(typedExpression.condition)
     guard typedExpression.condition.type == .bool else {
       throw TypecheckerError.inaproppriateType(
         expected: [.bool], got: [typedExpression.condition.type],
@@ -180,7 +177,7 @@ extension Typechecker {
   private mutating func typecheckNotExpression(_ expression: NotExpression) throws -> NotExpression
   {
     var typedExpression = expression
-    typedExpression.value = try getAndSetTypes(typedExpression.value)
+    typedExpression.value = try typecheck(typedExpression.value)
 
     guard typedExpression.value.type == .bool || typedExpression.value.type == .int else {
       throw TypecheckerError.inaproppriateType(
@@ -210,7 +207,7 @@ extension Typechecker {
     }
 
     typedExpression.arguments = try expression.arguments.enumerated().map { index, argument in
-      let typedArgument = try getAndSetTypes(argument)
+      let typedArgument = try typecheck(argument)
       guard typedArgument.type == expectedTypes.params[index] else {
         throw TypecheckerError.inaproppriateType(
           expected: [expectedTypes.params[index]], got: [typedArgument.type],
