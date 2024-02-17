@@ -9,7 +9,7 @@ let input = """
   }
   """
 var tokenizer = Tokenizer(input: input)
-tokenizer.tokenize()
+try tokenizer.tokenize()
 var parser = Parser(tokens: tokenizer.tokens)
 var expression = try parser.parse()
 

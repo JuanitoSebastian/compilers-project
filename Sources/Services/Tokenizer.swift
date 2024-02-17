@@ -9,12 +9,12 @@ struct Tokenizer {
     self.tokens = []
   }
 
-  mutating func tokenize() {
+  mutating func tokenize() throws {
     var positionIndex = input.startIndex
     var line = 0
     var position = 0
     while positionIndex < input.endIndex {
-      if let token = match(
+      if let token = try match(
         input[positionIndex...], positionIndex: positionIndex, line: line, position: position
       ) {
         if token.type != .lineComment && token.type != .newLine { tokens.append(token) }
@@ -34,18 +34,18 @@ struct Tokenizer {
 
   func match(
     _ input: Substring, positionIndex: Substring.Index, line: Int, position: Int
-  ) -> Token? {
+  ) throws -> Token? {
     for tokenType in TokenType.allCases {
       if let matcher = RegexMatcher(tokenType.regex, input: String(input)) {
         let range = Range<String.Index>(
           uncheckedBounds: (
             lower: positionIndex,
-            upper: input.base.index(positionIndex, offsetBy: matcher.match.count)
+            upper: input.base.index(positionIndex, offsetBy: try matcher.match.count)
           )
         )
         return Token(
           type: tokenType,
-          value: matcher.match,
+          value: try matcher.match,
           location: Location(file: file, range: range, line: line, position: position)
         )
       }

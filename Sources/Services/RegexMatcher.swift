@@ -22,16 +22,17 @@ struct RegexMatcher {
   }
 
   var match: String {
-    guard let rangeToUse = Range(result.range, in: input) else {
-      return ""
+    get throws {
+      return String(input[try range])
     }
-    return String(input[rangeToUse])
   }
 
   var range: Range<String.Index> {
-    guard let rangeToUse = Range(result.range, in: input) else {
-      return input.startIndex..<input.startIndex
+    get throws {
+      guard let rangeToUse = Range(result.range, in: input) else {
+        throw RegexMatcherError.invalidRangeForInput(input: input, range: result.range)
+      }
+      return rangeToUse
     }
-    return rangeToUse
   }
 }

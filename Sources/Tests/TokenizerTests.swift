@@ -18,7 +18,7 @@ final class TokenizerTests: XCTestCase {
       }
       """
     var tokenizer = Tokenizer(input: input)
-    tokenizer.tokenize()
+    try tokenizer.tokenize()
     XCTAssertEqual(tokenizer.tokens.count, 15)
     XCTAssertEqual(
       tokenizer.tokens[0],
@@ -115,7 +115,7 @@ final class TokenizerTests: XCTestCase {
       for
       """
     var tokenizer = Tokenizer(input: input)
-    tokenizer.tokenize()
+    try tokenizer.tokenize()
     XCTAssertEqual(tokenizer.tokens.count, 3)
     XCTAssertEqual(
       tokenizer.tokens[0],
@@ -144,7 +144,7 @@ final class TokenizerTests: XCTestCase {
       648
       """
     var tokenizer = Tokenizer(input: input)
-    tokenizer.tokenize()
+    try tokenizer.tokenize()
     let correctStrings = ["1", "2", "400958", "-", "1", "648"]
     let correctTypes = [
       TokenType.integerLiteral,
@@ -165,7 +165,7 @@ final class TokenizerTests: XCTestCase {
       + - * / % = == != < > <= >=
       """
     var tokenizer = Tokenizer(input: input)
-    tokenizer.tokenize()
+    try tokenizer.tokenize()
     let correctStrings = ["+", "-", "*", "/", "%", "=", "==", "!=", "<", ">", "<=", ">="]
     tokenizer.tokens.enumerated().forEach({ (index, token) in
       XCTAssertEqual(token.value, correctStrings[index])
@@ -177,7 +177,7 @@ final class TokenizerTests: XCTestCase {
     let input = "int hundred_number = 100"
     let expected = ["int", "hundred_number", "=", "100"]
     var tokenizer = Tokenizer(input: input)
-    tokenizer.tokenize()
+    try tokenizer.tokenize()
     XCTAssertEqual(tokenizer.tokens.count, expected.count)
     tokenizer.tokens.enumerated().forEach({ (index, token) in
       XCTAssertEqual(token.value, expected[index])
@@ -187,7 +187,7 @@ final class TokenizerTests: XCTestCase {
   func test_token_location_returns_appropariate_section_of_string() throws {
     let input = "if (a == 3) { b = 4 }"
     var tokenizer = Tokenizer(input: input)
-    tokenizer.tokenize()
+    try tokenizer.tokenize()
     for token in tokenizer.tokens {
       let range = token.location.range!
       XCTAssertEqual(token.value, String(input[range]))
@@ -198,7 +198,7 @@ final class TokenizerTests: XCTestCase {
     let input = "and or"
     let expected = ["and", "or"]
     var tokenizer = Tokenizer(input: input)
-    tokenizer.tokenize()
+    try tokenizer.tokenize()
     XCTAssertEqual(tokenizer.tokens.count, expected.count)
     tokenizer.tokens.enumerated().forEach({ (index, token) in
       XCTAssertEqual(token.value, expected[index])

@@ -4,9 +4,7 @@ import XCTest
 
 final class ParserTests: XCTestCase {
   func test_parse_addition_with_ints() throws {
-    var tokenizer = Tokenizer(input: "1 + 2")
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    var parser = Parser(tokens: try tokenizeInput("1 + 2"))
     let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse()[0])!.e
     XCTAssertEqual(
       binaryOpExpression,
@@ -15,9 +13,7 @@ final class ParserTests: XCTestCase {
   }
 
   func test_parse_addition_with_int_and_identifier() throws {
-    var tokenizer = Tokenizer(input: "1 + a")
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    var parser = Parser(tokens: try tokenizeInput("1 + a"))
     let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse()[0])!.e
     XCTAssertEqual(
       binaryOpExpression,
@@ -26,9 +22,7 @@ final class ParserTests: XCTestCase {
   }
 
   func test_parse_operation_with_multiple_numbers() throws {
-    var tokenizer = Tokenizer(input: "10 + a - 3")
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    var parser = Parser(tokens: try tokenizeInput("10 + a - 3"))
     let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse()[0])!.e
     XCTAssertEqual(
       binaryOpExpression,
@@ -39,9 +33,7 @@ final class ParserTests: XCTestCase {
   }
 
   func test_parse_multiplication() throws {
-    var tokenizer = Tokenizer(input: "2 - 10 * 2")
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    var parser = Parser(tokens: try tokenizeInput("2 - 10 * 2"))
     let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse()[0])!.e
     XCTAssertEqual(
       binaryOpExpression,
@@ -52,9 +44,7 @@ final class ParserTests: XCTestCase {
   }
 
   func test_parse_parentesis() throws {
-    var tokenizer = Tokenizer(input: "(2 - 10) * 2")
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    var parser = Parser(tokens: try tokenizeInput("(2 - 10) * 2"))
     let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse()[0])!.e
     XCTAssertEqual(
       binaryOpExpression,
@@ -65,9 +55,7 @@ final class ParserTests: XCTestCase {
   }
 
   func test_orphan_plus_sign_throws() throws {
-    var tokenizer = Tokenizer(input: "1 + 2 +")
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    var parser = Parser(tokens: try tokenizeInput("1 + 2 +"))
     XCTAssertThrowsError(try parser.parse()) { error in
       XCTAssertEqual(
         error as? ParserError,
@@ -76,9 +64,7 @@ final class ParserTests: XCTestCase {
   }
 
   func test_oprhan_multiply_sign_throws() throws {
-    var tokenizer = Tokenizer(input: "1 + 2 *")
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    var parser = Parser(tokens: try tokenizeInput("1 + 2 *"))
     XCTAssertThrowsError(try parser.parse()) { error in
       XCTAssertEqual(
         error as? ParserError,
@@ -87,9 +73,7 @@ final class ParserTests: XCTestCase {
   }
 
   func test_empty_parentheses_throws() throws {
-    var tokenizer = Tokenizer(input: "()")
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    var parser = Parser(tokens: try tokenizeInput("()"))
     XCTAssertThrowsError(try parser.parse()) { error in
       XCTAssertEqual(
         error as? ParserError,
@@ -100,9 +84,7 @@ final class ParserTests: XCTestCase {
   }
 
   func test_parse_if_statement() throws {
-    var tokenizer = Tokenizer(input: "if false then 2 ")
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    var parser = Parser(tokens: try tokenizeInput("if false then 2 "))
     let ifExpression = ParserHelper<IfExpression>(try parser.parse()[0])!.e
     XCTAssertEqual(
       ifExpression,
@@ -112,9 +94,7 @@ final class ParserTests: XCTestCase {
   }
 
   func test_parse_if_else_statement() throws {
-    var tokenizer = Tokenizer(input: "if 3 then 2 else true")
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    var parser = Parser(tokens: try tokenizeInput("if 3 then 2 else true"))
     let ifExpression = ParserHelper<IfExpression>(try parser.parse()[0])!.e
     XCTAssertEqual(
       ifExpression,
@@ -124,9 +104,7 @@ final class ParserTests: XCTestCase {
   }
 
   func test_parse_if_expression_as_part_of_other_expression() throws {
-    var tokenizer = Tokenizer(input: "1 + if true then 2 else 3")
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    var parser = Parser(tokens: try tokenizeInput("1 + if true then 2 else 3"))
     let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse()[0])!.e
     XCTAssertEqual(
       binaryOpExpression,
@@ -139,9 +117,7 @@ final class ParserTests: XCTestCase {
   }
 
   func test_parse_function_call() throws {
-    var tokenizer = Tokenizer(input: "foo(1, 2)")
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    var parser = Parser(tokens: try tokenizeInput("foo(1, 2)"))
     let functionCallExpression = ParserHelper<FunctionCallExpression>(try parser.parse()[0])!.e
     XCTAssertEqual(
       functionCallExpression,
@@ -151,9 +127,7 @@ final class ParserTests: XCTestCase {
   }
 
   func test_parse_function_call_with_no_parameters() throws {
-    var tokenizer = Tokenizer(input: "foo()")
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    var parser = Parser(tokens: try tokenizeInput("foo()"))
     let functionCallExpression = ParserHelper<FunctionCallExpression>(try parser.parse()[0])!.e
     XCTAssertEqual(
       functionCallExpression,
@@ -163,9 +137,7 @@ final class ParserTests: XCTestCase {
 
 extension ParserTests {
   func test_parse_assignment_operator() throws {
-    var tokenizer = Tokenizer(input: "a = 1 + 2 - 3")
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    var parser = Parser(tokens: try tokenizeInput("a = 1 + 2 - 3"))
     let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse()[0])!.e
     XCTAssertEqual(
       binaryOpExpression,
@@ -178,17 +150,13 @@ extension ParserTests {
   }
 
   func test_parse_not_expression() throws {
-    var tokenizer = Tokenizer(input: "not 5")
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    var parser = Parser(tokens: try tokenizeInput("not 5"))
     let noExpression = ParserHelper<NotExpression>(try parser.parse()[0])!.e
     XCTAssertEqual(noExpression, NotExpression(value: LiteralExpression<Int>(value: 5)))
   }
 
   func test_parse_not_not_expression() throws {
-    var tokenizer = Tokenizer(input: "not not 5")
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    var parser = Parser(tokens: try tokenizeInput("not not 5"))
     let intLiteralExpression = ParserHelper<LiteralExpression<Int>>(try parser.parse()[0])!.e
     XCTAssertEqual(intLiteralExpression, LiteralExpression<Int>(value: 5))
   }
@@ -204,9 +172,7 @@ extension ParserTests {
         }
       }
       """
-    var tokenizer = Tokenizer(input: input)
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    var parser = Parser(tokens: try tokenizeInput(input))
     let blockExpression = ParserHelper<BlockExpression>(try parser.parse()[0])!.e
     XCTAssertEqual(
       blockExpression,
@@ -237,9 +203,7 @@ extension ParserTests {
   }
 
   func test_parse_variable_declaration() throws {
-    var tokenizer = Tokenizer(input: "{ var a = 1 + 2 - 3; }")
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    var parser = Parser(tokens: try tokenizeInput("{ var a = 1 + 2 - 3; }"))
     let blockExpressionWithVarDeclaration = ParserHelper<BlockExpression>(try parser.parse()[0])!.e
     XCTAssertEqual(
       blockExpressionWithVarDeclaration,
@@ -256,17 +220,13 @@ extension ParserTests {
   }
 
   func test_parse_variable_expression_with_type() throws {
-    var tokenizer = Tokenizer(
-      input:
-        """
-        {
-          var a: Int = 1 + 2 - 3;
-          var b: Bool = true;
-        }
-        """
-    )
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    let input = """
+      {
+        var a: Int = 1 + 2 - 3;
+        var b: Bool = true;
+      }
+      """
+    var parser = Parser(tokens: try tokenizeInput(input))
     let varDeclarationExpression = ParserHelper<BlockExpression>(try parser.parse()[0])!.e
     XCTAssertEqual(
       varDeclarationExpression,
@@ -290,9 +250,7 @@ extension ParserTests {
   func test_parsing_invalid_blocks_throw_error() throws {
     let inputs = ["{ a b }", "{ if true then { a } b c }"]
     for input in inputs {
-      var tokenizer = Tokenizer(input: input)
-      tokenizer.tokenize()
-      var parser = Parser(tokens: tokenizer.tokens)
+      var parser = Parser(tokens: try tokenizeInput(input))
       XCTAssertThrowsError(try parser.parse())
     }
   }
@@ -304,17 +262,13 @@ extension ParserTests {
       "x = { { f(a) } { b } }"
     ]
     for input in inputs {
-      var tokenizer = Tokenizer(input: input)
-      tokenizer.tokenize()
-      var parser = Parser(tokens: tokenizer.tokens)
+      var parser = Parser(tokens: try tokenizeInput(input))
       XCTAssertNoThrow(try parser.parse())
     }
   }
 
   func test_parsing_while_expression() throws {
-    var tokenizer = Tokenizer(input: "while true do { a = a + 1; }")
-    tokenizer.tokenize()
-    var parser = Parser(tokens: tokenizer.tokens)
+    var parser = Parser(tokens: try tokenizeInput("while true do { a = a + 1; }"))
     let whileExpression = ParserHelper<WhileExpression>(try parser.parse()[0])!.e
     XCTAssertEqual(
       whileExpression,
@@ -328,6 +282,14 @@ extension ParserTests {
                 left: IdentifierExpression(value: "a"), op: "+", right: LiteralExpression(value: 1))
             )
           ], resultExpression: nil)))
+  }
+}
+
+extension ParserTests {
+  func tokenizeInput(_ input: String) throws -> [Token] {
+    var tokenizer = Tokenizer(input: input)
+    try tokenizer.tokenize()
+    return tokenizer.tokens
   }
 }
 

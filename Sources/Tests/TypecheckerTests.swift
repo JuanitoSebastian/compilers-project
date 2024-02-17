@@ -192,7 +192,7 @@ final class TypechkerTests: XCTestCase {
 extension TypechkerTests {
   private func toExpression(_ expressionString: String) throws -> (any Expression) {
     var tokenizer = Tokenizer(input: expressionString)
-    tokenizer.tokenize()
+    try tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
     return try! parser.parse()[0]!
   }
