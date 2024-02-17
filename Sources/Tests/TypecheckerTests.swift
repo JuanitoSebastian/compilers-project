@@ -24,12 +24,10 @@ final class TypechkerTests: XCTestCase {
     var typechecker = Typechecker()
     let expression = try toExpression("{ var x: Int = 1; }") as! BlockExpression
     let varExpression = expression.statements[0] as! VarDeclarationExpression
-    let varExpressionTyped = try typechecker.typecheck(varExpression)
-    let valueTyped = try typechecker.typecheck(varExpression.variableValue)
-    let identifierTyped = try typechecker.typecheck(varExpression.variableIdentifier)
+    let varExpressionTyped = try typechecker.typecheck(varExpression) as! VarDeclarationExpression
     XCTAssertEqual(varExpressionTyped.type, Type.unit)
-    XCTAssertEqual(valueTyped.type, Type.int)
-    XCTAssertEqual(identifierTyped.type, Type.int)
+    XCTAssertEqual(varExpressionTyped.variableValue.type, Type.int)
+    XCTAssertEqual(varExpressionTyped.variableIdentifier.type, Type.int)
   }
 
   func test_typecheck_invalid_var_declaration_expression_throws() throws {
