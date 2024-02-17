@@ -3,53 +3,36 @@ struct Typechecker {
   var funcTypesTab: SymTab<(params: [Type], returns: Type)> = SymTab(builtInFuncTypes)
 
   mutating func typecheck(_ expression: (any Expression)) throws -> (any Expression) {
-    var expression = expression
-    _ = try getAndSetTypes(&expression)
-    return expression
+    return try getAndSetTypes(expression)
   }
 }
 
 extension Typechecker {
-  mutating private func getAndSetTypes(_ expression: inout (any Expression)) throws -> Type {
+  mutating private func getAndSetTypes(_ expression: (any Expression)) throws -> any Expression {
+    var expressionToReturn = expression
     switch expression {
     case _ as LiteralExpression<Int>:
-      expression.type = .int
-      return .int
+      expressionToReturn.type = .int
+      return expressionToReturn
     case _ as LiteralExpression<Bool>:
-      expression.type = .bool
-      return .bool
-    case var binaryOpExpression as BinaryOpExpression:
-      let type = try typecheckBinaryOpExpression(&binaryOpExpression)
-      expression.type = type
-      return type
-    case var identifierExpression as IdentifierExpression:
-      let type = try typecheckIdentifierExpression(&identifierExpression)
-      expression.type = type
-      return type
-    case var varDeclarationExpression as VarDeclarationExpression:
-      let type = try typecheckVarDeclarationExpression(&varDeclarationExpression)
-      expression.type = type
-      return type
-    case var blockExpression as BlockExpression:
-      let type = try typecheckBlockExpression(&blockExpression)
-      expression.type = type
-      return type
-    case var ifExpression as IfExpression:
-      let type = try typecheckIfExpression(&ifExpression)
-      expression.type = type
-      return type
-    case var whileExpression as WhileExpression:
-      let type = try typecheckWhileExpression(&whileExpression)
-      expression.type = type
-      return type
-    case var notExpression as NotExpression:
-      let type = try typecheckNotExpression(&notExpression)
-      expression.type = type
-      return type
-    case var functionCallExpression as FunctionCallExpression:
-      let type = try typecheckFunctionCallExpression(&functionCallExpression)
-      expression.type = type
-      return type
+      expressionToReturn.type = .bool
+      return expressionToReturn
+    case let binaryOpExpression as BinaryOpExpression:
+      return try typecheckBinaryOpExpression(binaryOpExpression)
+    case let identifierExpression as IdentifierExpression:
+      return try typecheckIdentifierExpression(identifierExpression)
+    case let varDeclarationExpression as VarDeclarationExpression:
+      return try typecheckVarDeclarationExpression(varDeclarationExpression)
+    case let blockExpression as BlockExpression:
+      return try typecheckBlockExpression(blockExpression)
+    case let ifExpression as IfExpression:
+      return try typecheckIfExpression(ifExpression)
+    case let whileExpression as WhileExpression:
+      return try typecheckWhileExpression(whileExpression)
+    case let notExpression as NotExpression:
+      return try typecheckNotExpression(notExpression)
+    case let functionCallExpression as FunctionCallExpression:
+      return try typecheckFunctionCallExpression(functionCallExpression)
     default:
       let typeOfExpression = type(of: expression)
       throw TypecheckerError.unknownExpressionType(
@@ -59,135 +42,163 @@ extension Typechecker {
   }
 
   mutating private func typecheckBinaryOpExpression(
-    _ expression: inout BinaryOpExpression
-  ) throws -> Type {
-    let leftType = try getAndSetTypes(&expression.left)
-    let rightType = try getAndSetTypes(&expression.right)
+    _ expression: BinaryOpExpression
+  ) throws -> BinaryOpExpression {
+    var typedExpression = expression
+    typedExpression.left = try getAndSetTypes(expression.left)
+    typedExpression.right = try getAndSetTypes(expression.right)
 
     if expression.op == "=" {
-      guard leftType == rightType else {
+      guard typedExpression.left.type == typedExpression.right.type else {
         throw TypecheckerError.inaproppriateType(
-          expected: [leftType], got: [rightType], location: expression.location
+          expected: [typedExpression.left.type], got: [typedExpression.right.type],
+          location: expression.location
         )
       }
-      return .unit
+      typedExpression.type = .unit
+      return typedExpression
     }
 
     guard let expectedTypes = funcTypesTab.lookup(expression.op) else {
       throw TypecheckerError.unsupportedOperator(op: expression.op, location: expression.location)
     }
 
-    guard expectedTypes.params == [leftType, rightType] else {
+    guard expectedTypes.params == [typedExpression.left.type, typedExpression.right.type] else {
       throw TypecheckerError.inaproppriateType(
-        expected: expectedTypes.params, got: [leftType, rightType], location: expression.location
+        expected: expectedTypes.params,
+        got: [typedExpression.left.type, typedExpression.right.type], location: expression.location
       )
     }
 
-    return expectedTypes.returns
+    typedExpression.type = expectedTypes.returns
+
+    return typedExpression
   }
 
-  private func typecheckIdentifierExpression(_ expression: inout IdentifierExpression) throws
-    -> Type
+  private func typecheckIdentifierExpression(_ expression: IdentifierExpression) throws
+    -> IdentifierExpression
   {
+    var typedExpression = expression
     guard let type = symTab.lookup(expression.value) else {
       throw TypecheckerError.referenceToUndefinedIdentifier(
         identifier: expression.value, location: expression.location
       )
     }
-
-    return type
+    typedExpression.type = type
+    return typedExpression
   }
 
   private mutating func typecheckVarDeclarationExpression(
-    _ expression: inout VarDeclarationExpression
-  ) throws -> Type {
+    _ expression: VarDeclarationExpression
+  ) throws -> VarDeclarationExpression {
+    var typedExpression = expression
     let variableName = expression.variableIdentifier.value
-    let type = try getAndSetTypes(&expression.variableValue)
+    typedExpression.variableValue = try getAndSetTypes(expression.variableValue)
+    typedExpression.variableIdentifier.type = typedExpression.variableValue.type
+
     if let typeDeclaration = expression.variableType {
-      guard type == typeDeclaration else {
+      guard typedExpression.variableValue.type == typeDeclaration else {
         throw TypecheckerError.inaproppriateType(
-          expected: [typeDeclaration], got: [type], location: expression.location)
+          expected: [typeDeclaration], got: [typedExpression.variableValue.type],
+          location: typedExpression.location)
       }
     }
 
     guard symTab.lookup(variableName) == nil else {
       throw TypecheckerError.identifierAlreadyDeclared(
-        identifier: expression.variableIdentifier.value,
-        location: expression.location
+        identifier: typedExpression.variableIdentifier.value,
+        location: typedExpression.location
       )
     }
 
-    symTab.insert(type, for: variableName)
-    return .unit
+    symTab.insert(typedExpression.variableValue.type!, for: variableName)
+    typedExpression.type = .unit
+    return typedExpression
   }
 
-  private mutating func typecheckBlockExpression(_ expression: inout BlockExpression) throws -> Type
+  private mutating func typecheckBlockExpression(_ expression: BlockExpression) throws
+    -> BlockExpression
   {
-    for var statement in expression.statements {
-      _ = try getAndSetTypes(&statement)
+    var typedExpression = expression
+    typedExpression.statements = try expression.statements.map { statement in
+      try getAndSetTypes(statement)
     }
 
-    if var resultExpression = expression.resultExpression {
-      return try getAndSetTypes(&resultExpression)
+    if let resultExpression = typedExpression.resultExpression {
+      typedExpression.resultExpression = try getAndSetTypes(resultExpression)
     }
 
-    return .unit
+    typedExpression.type = typedExpression.resultExpression?.type ?? .unit
+    return typedExpression
   }
 
-  private mutating func typecheckIfExpression(_ expression: inout IfExpression) throws -> Type {
-    let conditionType = try getAndSetTypes(&expression.condition)
-    guard conditionType == .bool else {
+  private mutating func typecheckIfExpression(_ expression: IfExpression) throws
+    -> IfExpression
+  {
+    var typedExpression = expression
+    typedExpression.condition = try getAndSetTypes(typedExpression.condition)
+    guard typedExpression.condition.type == .bool else {
       throw TypecheckerError.inaproppriateType(
-        expected: [.bool], got: [conditionType], location: expression.condition.location
+        expected: [.bool], got: [typedExpression.condition.type],
+        location: expression.condition.location
       )
     }
 
-    let thenType = try getAndSetTypes(&expression.thenExpression)
+    typedExpression.thenExpression = try getAndSetTypes(typedExpression.thenExpression)
 
-    if var elseExpression = expression.elseExpression {
-      let elseType = try getAndSetTypes(&elseExpression)
-      guard thenType == elseType else {
+    if let elseExpression = typedExpression.elseExpression {
+      typedExpression.elseExpression = try getAndSetTypes(elseExpression)
+      guard typedExpression.thenExpression.type == typedExpression.elseExpression?.type else {
         throw TypecheckerError.inaproppriateType(
-          expected: [thenType], got: [elseType], location: expression.elseExpression?.location
+          expected: [typedExpression.thenExpression.type],
+          got: [typedExpression.elseExpression?.type], location: expression.elseExpression?.location
         )
       }
     }
 
-    return thenType
+    typedExpression.type = typedExpression.thenExpression.type
+
+    return typedExpression
   }
 
-  private mutating func typecheckWhileExpression(_ expression: inout WhileExpression) throws -> Type
+  private mutating func typecheckWhileExpression(_ expression: WhileExpression) throws
+    -> WhileExpression
   {
-    let conditionType = try getAndSetTypes(&expression.condition)
-    guard conditionType == .bool else {
+    var typedExpression = expression
+    typedExpression.condition = try getAndSetTypes(typedExpression.condition)
+    guard typedExpression.condition.type == .bool else {
       throw TypecheckerError.inaproppriateType(
-        expected: [.bool], got: [conditionType], location: expression.condition.location
+        expected: [.bool], got: [typedExpression.condition.type],
+        location: expression.condition.location
       )
     }
-    var body = expression.body as (any Expression)
-    _ = try getAndSetTypes(&body)
-    return .unit
+    typedExpression.body = try typecheckBlockExpression(typedExpression.body)
+    typedExpression.type = .unit
+    return typedExpression
   }
 
-  private mutating func typecheckNotExpression(_ expression: inout NotExpression) throws -> Type {
-    let type = try getAndSetTypes(&expression.value)
+  private mutating func typecheckNotExpression(_ expression: NotExpression) throws -> NotExpression
+  {
+    var typedExpression = expression
+    typedExpression.value = try getAndSetTypes(typedExpression.value)
 
-    guard type == .bool || type == .int else {
+    guard typedExpression.value.type == .bool || typedExpression.value.type == .int else {
       throw TypecheckerError.inaproppriateType(
-        expected: [.bool, .int], got: [type], location: expression.location
+        expected: [.bool, .int], got: [typedExpression.value.type], location: expression.location
       )
     }
-
-    return type
+    typedExpression.type = typedExpression.value.type
+    return typedExpression
   }
 
-  private mutating func typecheckFunctionCallExpression(_ expression: inout FunctionCallExpression)
+  private mutating func typecheckFunctionCallExpression(_ expression: FunctionCallExpression)
     throws
-    -> Type
+    -> FunctionCallExpression
   {
-    guard let expectedTypes = funcTypesTab.lookup(expression.identifier.value) else {
+    var typedExpression = expression
+    guard let expectedTypes = funcTypesTab.lookup(typedExpression.identifier.value) else {
       throw TypecheckerError.referenceToUndefinedIdentifier(
-        identifier: expression.identifier.value, location: expression.location
+        identifier: typedExpression.identifier.value, location: expression.location
       )
     }
 
@@ -198,16 +209,19 @@ extension Typechecker {
       )
     }
 
-    for (index, var argument) in expression.arguments.enumerated() {
-      let argumentType = try getAndSetTypes(&argument)
-      guard argumentType == expectedTypes.params[index] else {
+    typedExpression.arguments = try expression.arguments.enumerated().map { index, argument in
+      let typedArgument = try getAndSetTypes(argument)
+      guard typedArgument.type == expectedTypes.params[index] else {
         throw TypecheckerError.inaproppriateType(
-          expected: [expectedTypes.params[index]], got: [argumentType],
-          location: expression.location)
+          expected: [expectedTypes.params[index]], got: [typedArgument.type],
+          location: argument.location
+        )
       }
+      return typedArgument
     }
 
-    return expectedTypes.returns
+    typedExpression.type = expectedTypes.returns
+    return typedExpression
   }
 
 }
