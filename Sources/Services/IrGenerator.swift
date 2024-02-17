@@ -1,6 +1,6 @@
 struct IrGenerator {
   let expressions: [any Expression]
-  var instructions: [any Instruction]
+  var instructions: [any Instruction] = []
   var symTab: SymTab<IrVar> = SymTab()
   var varTypes: SymTab<Type> = SymTab()
   var nextVarNumber: Int = 0
