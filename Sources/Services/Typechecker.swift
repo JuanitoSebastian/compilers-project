@@ -108,7 +108,7 @@ extension Typechecker {
       )
     }
 
-    symTab.insert(typedExpression.variableValue.type!, for: variableName)
+    try symTab.insert(typedExpression.variableValue.type!, for: variableName)
     typedExpression.type = .unit
     return typedExpression
   }
@@ -127,7 +127,7 @@ extension Typechecker {
     }
 
     typedExpression.type = typedExpression.resultExpression?.type ?? .unit
-    _ = symTab.pop()
+    _ = try symTab.pop()
     return typedExpression
   }
 
