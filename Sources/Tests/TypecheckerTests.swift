@@ -183,7 +183,13 @@ final class TypechkerTests: XCTestCase {
         TypecheckerError.identifierAlreadyDeclared(identifier: "x", location: L(0, 18))
       )
     }
+  }
 
+  func test_typecheck_variables_with_same_name_in_different_scopes() throws {
+    var typechecker = Typechecker()
+    let expression =
+      try toExpression("if 2 > 3 then { var a: Int = 2 } else { var a: Int = 2 }")
+    XCTAssertNoThrow(try typechecker.typecheck(expression))
   }
 }
 

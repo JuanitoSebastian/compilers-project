@@ -170,6 +170,7 @@ extension Parser {
           guard resultExpression == nil else {
             throw ParserError.missingSemicolon(token: token)
           }
+          expressions.removeLast()
           resultExpression = expression
         }
       }

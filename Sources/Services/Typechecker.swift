@@ -116,6 +116,7 @@ extension Typechecker {
   private mutating func typecheckBlockExpression(_ expression: BlockExpression) throws
     -> BlockExpression
   {
+    symTab.push()
     var typedExpression = expression
     typedExpression.statements = try expression.statements.map { statement in
       try typecheck(statement)
@@ -126,6 +127,7 @@ extension Typechecker {
     }
 
     typedExpression.type = typedExpression.resultExpression?.type ?? .unit
+    _ = symTab.pop()
     return typedExpression
   }
 
