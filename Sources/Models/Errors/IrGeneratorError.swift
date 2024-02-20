@@ -3,4 +3,5 @@ enum IrGeneratorError: Error {
   case missingType(expression: any Expression)
   case duplicateVarDeclaration(varDeclarationExpression: VarDeclarationExpression)
   case referenceToUndefinedVar(identifier: IdentifierExpression)
+  case referenceToUndefinedFunction(binaryOpExpression: BinaryOpExpression)
 }

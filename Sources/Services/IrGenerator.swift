@@ -1,9 +1,16 @@
 struct IrGenerator {
   let expressions: [any Expression]
   var instructions: [any Instruction] = []
-  var symTab: SymTab<IrVar> = SymTab()
+  var symTab: SymTab<IrVar> = SymTab(irBuiltInFuncs)
   var varTypes: SymTab<Type> = SymTab()
   var nextVarNumber: Int = 0
+  var labelNumbers: [String: Int] = [:]
+  let unitVar = IrVar(name: "unit")
+
+  init(expressions: [any Expression]) {
+    self.expressions = expressions
+    self.varTypes.insert(.unit, for: unitVar)
+  }
 
   mutating func generate() throws {
     for expression in expressions {
@@ -23,6 +30,8 @@ struct IrGenerator {
       return try handleVarDeclarationExpression(varExpression)
     case let identifierExpression as IdentifierExpression:
       return try handleIdentifierExpression(identifierExpression)
+    case let ifExpression as IfExpression:
+      return try handleIfExpression(ifExpression)
     default:
       fatalError("Unimplemented expression: \(node)")
     }
@@ -34,6 +43,17 @@ struct IrGenerator {
     let irVar = IrVar(name: "x\(varNumber)")
     varTypes.insert(type, for: irVar)
     return irVar
+  }
+
+  private mutating func newLabel(_ location: Location, _ labelFor: String? = nil) -> Label {
+    let labelKey = labelFor ?? "none"
+    let count = labelNumbers[labelKey] ?? 1
+    let labelText =
+      labelFor == nil
+      ? "L\(count)"
+      : "\(labelKey)\(count)"
+    labelNumbers[labelKey] = count + 1
+    return Label(label: "\(labelText)", location: location)
   }
 
   private func unwrapLocation(_ expression: any Expression) throws -> Location {
@@ -70,8 +90,11 @@ extension IrGenerator {
     let left = try visit(binaryOpExpression.left)
     let right = try visit(binaryOpExpression.right)
     let irVar = newVar(try unwrapType(binaryOpExpression))
+    guard let functionIrVar = symTab.lookup(binaryOpExpression.op) else {
+      throw IrGeneratorError.referenceToUndefinedFunction(binaryOpExpression: binaryOpExpression)
+    }
     let instruction = Call(
-      function: IrVar(name: binaryOpExpression.op),
+      function: functionIrVar,
       arguments: [left, right],
       destination: irVar,
       location: try unwrapLocation(binaryOpExpression)
@@ -107,5 +130,40 @@ extension IrGenerator {
       throw IrGeneratorError.referenceToUndefinedVar(identifier: identifierExpression)
     }
     return irVar
+  }
+
+  private mutating func handleIfExpression(
+    _ ifExpression: IfExpression
+  ) throws -> IrVar {
+    let thenLabel = try newLabel(unwrapLocation(ifExpression.thenExpression), "then")
+    let endLabel = try newLabel(unwrapLocation(ifExpression), "if_end")
+    let condVar = try visit(ifExpression.condition)
+
+    guard let elseExpression = ifExpression.elseExpression else {
+      let condJump = CondJump(
+        condition: condVar, thenLabel: thenLabel, elseLabel: endLabel,
+        location: try unwrapLocation(ifExpression)
+      )
+      instructions.append(condJump)
+      instructions.append(thenLabel)
+      _ = try visit(ifExpression.thenExpression)
+      instructions.append(endLabel)
+      return unitVar
+    }
+
+    let elseLabel = try newLabel(unwrapLocation(elseExpression), "else")
+    let condJump = CondJump(
+      condition: condVar, thenLabel: thenLabel, elseLabel: elseLabel,
+      location: try unwrapLocation(ifExpression)
+    )
+    instructions.append(condJump)
+    instructions.append(thenLabel)
+    _ = try visit(ifExpression.thenExpression)
+    let jumpToEnd = Jump(label: endLabel, location: try unwrapLocation(ifExpression.thenExpression))
+    instructions.append(jumpToEnd)
+    instructions.append(elseLabel)
+    _ = try visit(elseExpression)
+    instructions.append(endLabel)
+    return unitVar
   }
 }
