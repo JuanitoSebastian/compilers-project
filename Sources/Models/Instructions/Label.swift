@@ -3,7 +3,7 @@ struct Label: Instruction, CustomStringConvertible, Equatable {
   let location: Location
 
   var description: String {
-    return label
+    return "Label(\(label))"
   }
 
   static func == (lhs: Label, rhs: Label) -> Bool {
