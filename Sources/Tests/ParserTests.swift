@@ -32,6 +32,16 @@ final class ParserTests: XCTestCase {
         op: "-", right: LiteralExpression(value: 3)))
   }
 
+  func test_parse_operation_with_negative_int() throws {
+    var parser = Parser(tokens: try tokenizeInput("10 + (-10)"))
+    let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse()[0])!.e
+    XCTAssertEqual(
+      binaryOpExpression,
+      BinaryOpExpression(
+        left: LiteralExpression(value: 10), op: "+",
+        right: NotExpression(value: LiteralExpression(value: 10))))
+  }
+
   func test_parse_multiplication() throws {
     var parser = Parser(tokens: try tokenizeInput("2 - 10 * 2"))
     let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse()[0])!.e

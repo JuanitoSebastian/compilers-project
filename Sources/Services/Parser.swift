@@ -51,7 +51,7 @@ struct Parser {
       return nil
     }
 
-    if token.value == "not" {
+    if ["not", "-"].contains(token.value) {
       return try parseNotExpression()
     }
 
@@ -245,7 +245,7 @@ extension Parser {
     var latestToken: Token?
     while let token = peek() {
       latestToken = token
-      if token.value == "not" {
+      if ["not", "-"].contains(token.value) {
         _ = try consume()
         not = !not
       } else {
