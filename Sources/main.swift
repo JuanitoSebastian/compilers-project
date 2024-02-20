@@ -1,6 +1,6 @@
 let input = """
-  var n: Int = 2
-  print_int(n)
+  var n: Bool = not true
+  print_bool(n)
   """
 var tokenizer = Tokenizer(input: input)
 try tokenizer.tokenize()

@@ -38,6 +38,8 @@ struct IrGenerator {
       return try handleWhileExpression(whileExpression)
     case let functionCallExpression as FunctionCallExpression:
       return try handleFunctionCallExpression(functionCallExpression)
+    case let notExpression as NotExpression:
+      return try handleNotExpression(notExpression)
     default:
       fatalError("Unimplemented expression: \(node)")
     }
@@ -93,6 +95,7 @@ extension IrGenerator {
   private mutating func handleBinaryOpExpression(
     _ binaryOpExpression: BinaryOpExpression
   ) throws -> IrVar {
+    // TODO: Handle =, and, or
     let left = try visit(binaryOpExpression.left)
     let right = try visit(binaryOpExpression.right)
     let irVar = try newVar(try unwrapType(binaryOpExpression))
@@ -248,5 +251,23 @@ extension IrGenerator {
     )
     instructions.append(functionCall)
     return functionCallIrVar
+  }
+
+  private mutating func handleNotExpression(
+    _ notExpression: NotExpression
+  ) throws -> IrVar {
+    guard let notFunction = symTab.lookup("unary_not") else {
+      throw IrGeneratorError.referenceToUndefinedFunction(function: "not")
+    }
+    let valueVar = try visit(notExpression.value)
+    let notVar = try newVar(try unwrapType(notExpression))
+    let notCall = Call(
+      function: notFunction,
+      arguments: [valueVar],
+      destination: notVar,
+      location: try unwrapLocation(notExpression)
+    )
+    instructions.append(notCall)
+    return notVar
   }
 }
