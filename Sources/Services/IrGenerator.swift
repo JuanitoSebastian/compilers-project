@@ -7,9 +7,9 @@ struct IrGenerator {
   var labelNumbers: [String: Int] = [:]
   let unitVar = IrVar(name: "unit")
 
-  init(expressions: [any Expression]) {
+  init(expressions: [any Expression]) throws {
     self.expressions = expressions
-    self.varTypes.insert(.unit, for: unitVar)
+    try self.varTypes.insert(.unit, for: unitVar)
   }
 
   mutating func generate() throws {
@@ -32,16 +32,22 @@ struct IrGenerator {
       return try handleIdentifierExpression(identifierExpression)
     case let ifExpression as IfExpression:
       return try handleIfExpression(ifExpression)
+    case let blockExpression as BlockExpression:
+      return try handleBlockExpression(blockExpression)
+    case let whileExpression as WhileExpression:
+      return try handleWhileExpression(whileExpression)
+    case let functionCallExpression as FunctionCallExpression:
+      return try handleFunctionCallExpression(functionCallExpression)
     default:
       fatalError("Unimplemented expression: \(node)")
     }
   }
 
-  private mutating func newVar(_ type: Type) -> IrVar {
+  private mutating func newVar(_ type: Type) throws -> IrVar {
     let varNumber = nextVarNumber
     nextVarNumber += 1
     let irVar = IrVar(name: "x\(varNumber)")
-    varTypes.insert(type, for: irVar)
+    try varTypes.insert(type, for: irVar)
     return irVar
   }
 
@@ -75,7 +81,7 @@ extension IrGenerator {
   private mutating func handleLiteralExpression<T: LiteralExpressionValue>(
     _ literalExpression: LiteralExpression<T>
   ) throws -> IrVar {
-    let irVar = newVar(try unwrapType(literalExpression))
+    let irVar = try newVar(try unwrapType(literalExpression))
     let instruction = LoadConst<T>(
       value: literalExpression.value, destination: irVar,
       location: try unwrapLocation(literalExpression)
@@ -89,9 +95,9 @@ extension IrGenerator {
   ) throws -> IrVar {
     let left = try visit(binaryOpExpression.left)
     let right = try visit(binaryOpExpression.right)
-    let irVar = newVar(try unwrapType(binaryOpExpression))
+    let irVar = try newVar(try unwrapType(binaryOpExpression))
     guard let functionIrVar = symTab.lookup(binaryOpExpression.op) else {
-      throw IrGeneratorError.referenceToUndefinedFunction(binaryOpExpression: binaryOpExpression)
+      throw IrGeneratorError.referenceToUndefinedFunction(function: binaryOpExpression.op)
     }
     let instruction = Call(
       function: functionIrVar,
@@ -113,12 +119,12 @@ extension IrGenerator {
     }
 
     let valueIrVar = try visit(varDeclarationExpression.variableValue)
-    let variableIrVar = newVar(try unwrapType(varDeclarationExpression.variableValue))
+    let variableIrVar = try newVar(try unwrapType(varDeclarationExpression.variableValue))
     let copyInstruction = Copy(
       source: valueIrVar, destination: variableIrVar,
       location: try unwrapLocation(varDeclarationExpression)
     )
-    symTab.insert(variableIrVar, for: varDeclarationExpression.variableIdentifier.value)
+    try symTab.insert(variableIrVar, for: varDeclarationExpression.variableIdentifier.value)
     instructions.append(copyInstruction)
     return variableIrVar
   }
@@ -148,9 +154,15 @@ extension IrGenerator {
       instructions.append(thenLabel)
       _ = try visit(ifExpression.thenExpression)
       instructions.append(endLabel)
-      return unitVar
+      let ifResult = try newVar(.unit)
+      let copyInstruction = Copy(
+        source: unitVar, destination: ifResult,
+        location: try unwrapLocation(ifExpression)
+      )
+      instructions.append(copyInstruction)
+      return ifResult
     }
-
+    let ifResult = try newVar(try unwrapType(ifExpression))
     let elseLabel = try newLabel(unwrapLocation(elseExpression), "else")
     let condJump = CondJump(
       condition: condVar, thenLabel: thenLabel, elseLabel: elseLabel,
@@ -158,12 +170,83 @@ extension IrGenerator {
     )
     instructions.append(condJump)
     instructions.append(thenLabel)
-    _ = try visit(ifExpression.thenExpression)
+    let thenResultVar = try visit(ifExpression.thenExpression)
+    let copyInstructionThen = Copy(
+      source: thenResultVar, destination: ifResult,
+      location: try unwrapLocation(ifExpression)
+    )
     let jumpToEnd = Jump(label: endLabel, location: try unwrapLocation(ifExpression.thenExpression))
+    instructions.append(copyInstructionThen)
     instructions.append(jumpToEnd)
     instructions.append(elseLabel)
-    _ = try visit(elseExpression)
+    let elseResultVar = try visit(elseExpression)
+    let copyInstructionElse = Copy(
+      source: elseResultVar, destination: ifResult,
+      location: try unwrapLocation(ifExpression)
+    )
+    instructions.append(copyInstructionElse)
     instructions.append(endLabel)
     return unitVar
+  }
+
+  private mutating func handleBlockExpression(
+    _ blockExpression: BlockExpression
+  ) throws -> IrVar {
+    symTab.push()
+    varTypes.push()
+    blockExpression.statements.forEach { _ = try? visit($0) }
+    guard let resultExpression = blockExpression.resultExpression else {
+      _ = try symTab.pop()
+      _ = try varTypes.pop()
+      return unitVar
+    }
+    let resultVar = try visit(resultExpression)
+    _ = try symTab.pop()
+    _ = try varTypes.pop()
+    return resultVar
+  }
+
+  private mutating func handleWhileExpression(
+    _ whileExpression: WhileExpression
+  ) throws -> IrVar {
+    let startLabel = try newLabel(unwrapLocation(whileExpression), "while_start")
+    instructions.append(startLabel)
+
+    let bodyLabel = try newLabel(unwrapLocation(whileExpression), "while_body")
+    let endLabel = try newLabel(unwrapLocation(whileExpression), "while_end")
+
+    let conditionVar = try visit(whileExpression.condition)
+    let condJump = CondJump(
+      condition: conditionVar, thenLabel: bodyLabel, elseLabel: endLabel,
+      location: try unwrapLocation(whileExpression)
+    )
+    instructions.append(condJump)
+
+    instructions.append(bodyLabel)
+    _ = try visit(whileExpression.body)
+    let jumpToStart = Jump(label: startLabel, location: try unwrapLocation(whileExpression.body))
+    instructions.append(jumpToStart)
+    instructions.append(endLabel)
+    return unitVar
+  }
+
+  private mutating func handleFunctionCallExpression(
+    _ functionCallExpression: FunctionCallExpression
+  ) throws -> IrVar {
+    guard let functionIrVar = symTab.lookup(functionCallExpression.identifier.value) else {
+      throw IrGeneratorError.referenceToUndefinedFunction(
+        function: functionCallExpression.identifier.value
+      )
+    }
+    let params = try functionCallExpression.arguments.map { try visit($0) }
+    let functionCallIrVar = try newVar(try unwrapType(functionCallExpression))
+    let functionCall = Call(
+      function: functionIrVar,
+      arguments: params,
+      destination: functionCallIrVar,
+      location: try unwrapLocation(functionCallExpression)
+    )
+    instructions.append(functionCall)
+    return functionCallIrVar
   }
 }
