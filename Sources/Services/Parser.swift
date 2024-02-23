@@ -1,18 +1,13 @@
 struct Parser {
   let tokens: [Token]
   private var position: Int = 0
-  private var isInsideBlock = false
 
   init(tokens: [Token]) {
     self.tokens = tokens
   }
 
-  mutating func parse() throws -> [(any Expression)?] {
-    var expressions: [(any Expression)?] = []
-    while position < tokens.count {
-      expressions.append(try parseExpression())
-    }
-    return expressions
+  mutating func parse() throws -> BlockExpression {
+    return try parseBlockExpression(topLevel: true)
   }
 
   private func peek(_ positionToPeek: Int? = nil) -> Token? {
@@ -153,37 +148,51 @@ struct Parser {
 // Functions for specific Expression types
 extension Parser {
 
-  private mutating func parseBlockExpression() throws -> BlockExpression {
-    // TODO: Make this better and more readable
-    let startBrace = try consume("{")
-    let alreadyInBlock = isInsideBlock
-    isInsideBlock = true
-    var expressions: [(any Expression)] = []
+  private mutating func parseBlockExpression(topLevel: Bool = false) throws -> BlockExpression {
+    var startToken: Token?
+    var endToken: Token?
+
+    if !topLevel {
+      startToken = try consume("{")
+    } else {
+      startToken = peek()
+    }
+
+    var statements: [(any Expression)] = []
     var resultExpression: (any Expression)?
+    var previousResultWasBlock = false
+
     while let token = peek(), token.value != "}" {
       if let expression = try parseExpression() {
-        expressions.append(expression)
         if let nextToken = peek(), nextToken.value == ";" {
+          statements.append(expression)
           _ = try consume(";")
           continue
-        } else if peek() != nil && peek(position - 1)?.value != "}" {
-          guard resultExpression == nil else {
-            throw ParserError.missingSemicolon(token: token)
+        } else {
+          // Semicolons optional after blocks
+          if let previousResultExpression = resultExpression {
+            guard previousResultWasBlock else {
+              throw ParserError.missingSemicolon(token: token)
+            }
+            statements.append(previousResultExpression)
           }
-          expressions.removeLast()
           resultExpression = expression
+          previousResultWasBlock = peek(position - 1)?.value == "}"
         }
       }
     }
 
-    if !alreadyInBlock {
-      isInsideBlock = false
+    if !topLevel {
+      endToken = try consume("}")
+    } else {
+      endToken = peek(position - 1)
     }
 
-    let endBrace = try consume("}")
-    let location = try Location.combineLocations(lhs: startBrace.location, rhs: endBrace.location)
+    let location = try Location.combineLocations(
+      lhs: startToken?.location, rhs: endToken?.location
+    )
     return BlockExpression(
-      statements: expressions, resultExpression: resultExpression, location: location
+      statements: statements, resultExpression: resultExpression, location: location
     )
   }
 

@@ -4,69 +4,92 @@ import XCTest
 
 final class ParserTests: XCTestCase {
   func test_parse_addition_with_ints() throws {
-    var parser = Parser(tokens: try tokenizeInput("1 + 2"))
-    let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse()[0])!.e
+    let expr = try parse("1 + 2")
+    let bOpE = BinaryOpExpression(
+      left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)
+    )
     XCTAssertEqual(
-      binaryOpExpression,
-      BinaryOpExpression(
-        left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)))
+      expr,
+      BlockExpression(statements: [], resultExpression: bOpE)
+    )
   }
 
   func test_parse_addition_with_int_and_identifier() throws {
-    var parser = Parser(tokens: try tokenizeInput("1 + a"))
-    let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse()[0])!.e
+    let expr = try parse("1 + a")
+    let bOpE = BinaryOpExpression(
+      left: LiteralExpression(value: 1), op: "+", right: IdentifierExpression(value: "a")
+    )
     XCTAssertEqual(
-      binaryOpExpression,
-      BinaryOpExpression(
-        left: LiteralExpression(value: 1), op: "+", right: IdentifierExpression(value: "a")))
+      expr,
+      BlockExpression(statements: [], resultExpression: bOpE)
+    )
   }
 
   func test_parse_operation_with_multiple_numbers() throws {
-    var parser = Parser(tokens: try tokenizeInput("10 + a - 3"))
-    let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse()[0])!.e
+    let expr = try parse("1 + 10 - 3")
+    let bOpE = BinaryOpExpression(
+      left: BinaryOpExpression(
+        left: LiteralExpression(value: 1),
+        op: "+",
+        right: LiteralExpression(value: 10)
+      ),
+      op: "-",
+      right: LiteralExpression(value: 3)
+    )
     XCTAssertEqual(
-      binaryOpExpression,
-      BinaryOpExpression(
-        left: BinaryOpExpression(
-          left: LiteralExpression(value: 10), op: "+", right: IdentifierExpression(value: "a")),
-        op: "-", right: LiteralExpression(value: 3)))
+      expr,
+      BlockExpression(statements: [], resultExpression: bOpE)
+    )
   }
 
   func test_parse_operation_with_negative_int() throws {
-    var parser = Parser(tokens: try tokenizeInput("10 + (-10)"))
-    let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse()[0])!.e
+    let expr = try parse("10 + (-10)")
+    let bOpE = BinaryOpExpression(
+      left: LiteralExpression(value: 10),
+      op: "+",
+      right: NotExpression(value: LiteralExpression(value: 10))
+    )
     XCTAssertEqual(
-      binaryOpExpression,
-      BinaryOpExpression(
-        left: LiteralExpression(value: 10), op: "+",
-        right: NotExpression(value: LiteralExpression(value: 10))))
+      expr,
+      BlockExpression(statements: [], resultExpression: bOpE)
+    )
   }
 
   func test_parse_multiplication() throws {
-    var parser = Parser(tokens: try tokenizeInput("2 - 10 * 2"))
-    let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse()[0])!.e
+    let expr = try parse("2 - 10 * 2")
+    let bOpE = BinaryOpExpression(
+      left: LiteralExpression(value: 2),
+      op: "-",
+      right: BinaryOpExpression(
+        left: LiteralExpression(value: 10),
+        op: "*",
+        right: LiteralExpression(value: 2)
+      )
+    )
     XCTAssertEqual(
-      binaryOpExpression,
-      BinaryOpExpression(
-        left: LiteralExpression(value: 2), op: "-",
-        right: BinaryOpExpression(
-          left: LiteralExpression(value: 10), op: "*", right: LiteralExpression(value: 2))))
+      expr,
+      BlockExpression(statements: [], resultExpression: bOpE)
+    )
   }
 
   func test_parse_parentesis() throws {
-    var parser = Parser(tokens: try tokenizeInput("(2 - 10) * 2"))
-    let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse()[0])!.e
+    let expr = try parse("(2 - 10) * 2")
+    let bOpE = BinaryOpExpression(
+      left: BinaryOpExpression(
+        left: LiteralExpression(value: 2),
+        op: "-",
+        right: LiteralExpression(value: 10)
+      ),
+      op: "*",
+      right: LiteralExpression(value: 2))
     XCTAssertEqual(
-      binaryOpExpression,
-      BinaryOpExpression(
-        left: BinaryOpExpression(
-          left: LiteralExpression(value: 2), op: "-", right: LiteralExpression(value: 10)), op: "*",
-        right: LiteralExpression(value: 2)))
+      expr,
+      BlockExpression(statements: [], resultExpression: bOpE)
+    )
   }
 
   func test_orphan_plus_sign_throws() throws {
-    var parser = Parser(tokens: try tokenizeInput("1 + 2 +"))
-    XCTAssertThrowsError(try parser.parse()) { error in
+    XCTAssertThrowsError(try parse("1 + 2 +")) { error in
       XCTAssertEqual(
         error as? ParserError,
         ParserError.noTokenFound(precedingToken: Token(type: .op, value: "+", location: L(0, 6))))
@@ -74,8 +97,7 @@ final class ParserTests: XCTestCase {
   }
 
   func test_oprhan_multiply_sign_throws() throws {
-    var parser = Parser(tokens: try tokenizeInput("1 + 2 *"))
-    XCTAssertThrowsError(try parser.parse()) { error in
+    XCTAssertThrowsError(try parse("1 + 2 *")) { error in
       XCTAssertEqual(
         error as? ParserError,
         ParserError.noTokenFound(precedingToken: Token(type: .op, value: "*", location: L(0, 6))))
@@ -83,8 +105,7 @@ final class ParserTests: XCTestCase {
   }
 
   func test_empty_parentheses_throws() throws {
-    var parser = Parser(tokens: try tokenizeInput("()"))
-    XCTAssertThrowsError(try parser.parse()) { error in
+    XCTAssertThrowsError(try parse("()")) { error in
       XCTAssertEqual(
         error as? ParserError,
         ParserError.unexpectedTokenType(
@@ -94,81 +115,105 @@ final class ParserTests: XCTestCase {
   }
 
   func test_parse_if_statement() throws {
-    var parser = Parser(tokens: try tokenizeInput("if false then 2 "))
-    let ifExpression = ParserHelper<IfExpression>(try parser.parse()[0])!.e
+    let expr = try parse("if false then 2")
+    let ifE = IfExpression(
+      condition: LiteralExpression<Bool>(value: false),
+      thenExpression: LiteralExpression<Int>(value: 2),
+      elseExpression: nil
+    )
     XCTAssertEqual(
-      ifExpression,
-      IfExpression(
-        condition: LiteralExpression<Bool>(value: false),
-        thenExpression: LiteralExpression<Int>(value: 2), elseExpression: nil))
+      expr,
+      BlockExpression(statements: [], resultExpression: ifE)
+    )
   }
 
   func test_parse_if_else_statement() throws {
-    var parser = Parser(tokens: try tokenizeInput("if 3 then 2 else true"))
-    let ifExpression = ParserHelper<IfExpression>(try parser.parse()[0])!.e
+    let expr = try parse("if 3 then 2 else true")
+    let ifE = IfExpression(
+      condition: LiteralExpression(value: 3),
+      thenExpression: LiteralExpression<Int>(value: 2),
+      elseExpression: LiteralExpression<Bool>(value: true)
+    )
     XCTAssertEqual(
-      ifExpression,
-      IfExpression(
-        condition: LiteralExpression(value: 3), thenExpression: LiteralExpression<Int>(value: 2),
-        elseExpression: LiteralExpression<Bool>(value: true)))
+      expr,
+      BlockExpression(statements: [], resultExpression: ifE)
+    )
   }
 
   func test_parse_if_expression_as_part_of_other_expression() throws {
-    var parser = Parser(tokens: try tokenizeInput("1 + if true then 2 else 3"))
-    let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse()[0])!.e
+    let expr = try parse("1 + if true then 2 else 3")
+    let bOpE = BinaryOpExpression(
+      left: LiteralExpression(value: 1),
+      op: "+",
+      right: IfExpression(
+        condition: LiteralExpression<Bool>(value: true),
+        thenExpression: LiteralExpression<Int>(value: 2),
+        elseExpression: LiteralExpression<Int>(value: 3)
+      )
+    )
     XCTAssertEqual(
-      binaryOpExpression,
-      BinaryOpExpression(
-        left: LiteralExpression(value: 1), op: "+",
-        right: IfExpression(
-          condition: LiteralExpression<Bool>(value: true),
-          thenExpression: LiteralExpression<Int>(value: 2),
-          elseExpression: LiteralExpression<Int>(value: 3))))
+      expr,
+      BlockExpression(statements: [], resultExpression: bOpE)
+    )
   }
 
   func test_parse_function_call() throws {
-    var parser = Parser(tokens: try tokenizeInput("foo(1, 2)"))
-    let functionCallExpression = ParserHelper<FunctionCallExpression>(try parser.parse()[0])!.e
+    let expr = try parse("foo(1, 2)")
+    let fCEx = FunctionCallExpression(
+      identifier: IdentifierExpression(value: "foo"),
+      arguments: [LiteralExpression<Int>(value: 1), LiteralExpression<Int>(value: 2)]
+    )
     XCTAssertEqual(
-      functionCallExpression,
-      FunctionCallExpression(
-        identifier: IdentifierExpression(value: "foo"),
-        arguments: [LiteralExpression<Int>(value: 1), LiteralExpression<Int>(value: 2)]))
+      expr,
+      BlockExpression(statements: [], resultExpression: fCEx)
+    )
   }
 
   func test_parse_function_call_with_no_parameters() throws {
-    var parser = Parser(tokens: try tokenizeInput("foo()"))
-    let functionCallExpression = ParserHelper<FunctionCallExpression>(try parser.parse()[0])!.e
+    let expr = try parse("foo()")
+    let fCEx = FunctionCallExpression(identifier: IdentifierExpression(value: "foo"), arguments: [])
     XCTAssertEqual(
-      functionCallExpression,
-      FunctionCallExpression(identifier: IdentifierExpression(value: "foo"), arguments: []))
+      expr,
+      BlockExpression(statements: [], resultExpression: fCEx)
+    )
   }
 }
 
 extension ParserTests {
   func test_parse_assignment_operator() throws {
-    var parser = Parser(tokens: try tokenizeInput("a = 1 + 2 - 3"))
-    let binaryOpExpression = ParserHelper<BinaryOpExpression>(try parser.parse()[0])!.e
+    let expr = try parse("a = 1 + 2 - 3")
+    let bOpE = BinaryOpExpression(
+      left: IdentifierExpression(value: "a"),
+      op: "=",
+      right: BinaryOpExpression(
+        left: BinaryOpExpression(
+          left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)),
+        op: "-",
+        right: LiteralExpression(value: 3)
+      )
+    )
     XCTAssertEqual(
-      binaryOpExpression,
-      BinaryOpExpression(
-        left: IdentifierExpression(value: "a"), op: "=",
-        right: BinaryOpExpression(
-          left: BinaryOpExpression(
-            left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)),
-          op: "-", right: LiteralExpression(value: 3))))
+      expr,
+      BlockExpression(statements: [], resultExpression: bOpE)
+    )
   }
 
   func test_parse_not_expression() throws {
-    var parser = Parser(tokens: try tokenizeInput("not 5"))
-    let noExpression = ParserHelper<NotExpression>(try parser.parse()[0])!.e
-    XCTAssertEqual(noExpression, NotExpression(value: LiteralExpression<Int>(value: 5)))
+    let expr = try parse("not true")
+    let nExpr = NotExpression(value: LiteralExpression<Bool>(value: true))
+    XCTAssertEqual(
+      expr,
+      BlockExpression(statements: [], resultExpression: nExpr)
+    )
   }
 
   func test_parse_not_not_expression() throws {
-    var parser = Parser(tokens: try tokenizeInput("not not 5"))
-    let intLiteralExpression = ParserHelper<LiteralExpression<Int>>(try parser.parse()[0])!.e
-    XCTAssertEqual(intLiteralExpression, LiteralExpression<Int>(value: 5))
+    let expr = try parse("not not false")
+    let litExpr = LiteralExpression(value: false)
+    XCTAssertEqual(
+      expr,
+      BlockExpression(statements: [], resultExpression: litExpr)
+    )
   }
 
   func test_parse_block_expression() throws {
@@ -182,51 +227,54 @@ extension ParserTests {
         }
       }
       """
-    var parser = Parser(tokens: try tokenizeInput(input))
-    let blockExpression = ParserHelper<BlockExpression>(try parser.parse()[0])!.e
+    let expr = try parse(input)
+    let blockExpression = BlockExpression(
+      statements: [
+        BinaryOpExpression(
+          left: IdentifierExpression(value: "a"), op: "=",
+          right: BinaryOpExpression(
+            left: BinaryOpExpression(
+              left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)),
+            op: "-", right: LiteralExpression(value: 3)))
+      ],
+      resultExpression: IfExpression(
+        condition: BinaryOpExpression(
+          left: LiteralExpression(value: 2), op: ">", right: LiteralExpression(value: 4)),
+        thenExpression: BlockExpression(
+          statements: [
+            FunctionCallExpression(
+              identifier: IdentifierExpression(value: "foo"),
+              arguments: [IdentifierExpression(value: "a")])
+          ], resultExpression: nil),
+        elseExpression: BlockExpression(
+          statements: [
+            FunctionCallExpression(
+              identifier: IdentifierExpression(value: "foo"),
+              arguments: [LiteralExpression(value: 1)])
+          ], resultExpression: nil))
+    )
     XCTAssertEqual(
-      blockExpression,
-      BlockExpression(
-        statements: [
-          BinaryOpExpression(
-            left: IdentifierExpression(value: "a"), op: "=",
-            right: BinaryOpExpression(
-              left: BinaryOpExpression(
-                left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)),
-              op: "-", right: LiteralExpression(value: 3))),
-          IfExpression(
-            condition: BinaryOpExpression(
-              left: LiteralExpression(value: 2), op: ">", right: LiteralExpression(value: 4)),
-            thenExpression: BlockExpression(
-              statements: [
-                FunctionCallExpression(
-                  identifier: IdentifierExpression(value: "foo"),
-                  arguments: [IdentifierExpression(value: "a")])
-              ], resultExpression: nil),
-            elseExpression: BlockExpression(
-              statements: [
-                FunctionCallExpression(
-                  identifier: IdentifierExpression(value: "foo"),
-                  arguments: [LiteralExpression(value: 1)])
-              ], resultExpression: nil))
-        ], resultExpression: nil))
+      expr,
+      BlockExpression(statements: [], resultExpression: blockExpression)
+    )
   }
 
   func test_parse_variable_declaration() throws {
-    var parser = Parser(tokens: try tokenizeInput("{ var a = 1 + 2 - 3; }"))
-    let blockExpressionWithVarDeclaration = ParserHelper<BlockExpression>(try parser.parse()[0])!.e
+    let expr = try parse("{ var a = 1 + 2 - 3; }")
+    let varDecl = VarDeclarationExpression(
+      variableIdentifier: IdentifierExpression(value: "a"),
+      variableValue: BinaryOpExpression(
+        left: BinaryOpExpression(
+          left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)),
+        op: "-", right: LiteralExpression(value: 3)),
+      variableType: nil
+    )
     XCTAssertEqual(
-      blockExpressionWithVarDeclaration,
+      expr,
       BlockExpression(
-        statements: [
-          VarDeclarationExpression(
-            variableIdentifier: IdentifierExpression(value: "a"),
-            variableValue: BinaryOpExpression(
-              left: BinaryOpExpression(
-                left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)),
-              op: "-", right: LiteralExpression(value: 3)),
-            variableType: nil)
-        ], resultExpression: nil))
+        statements: [],
+        resultExpression: BlockExpression(statements: [varDecl], resultExpression: nil))
+    )
   }
 
   func test_parse_variable_expression_with_type() throws {
@@ -236,62 +284,65 @@ extension ParserTests {
         var b: Bool = true;
       }
       """
-    var parser = Parser(tokens: try tokenizeInput(input))
-    let varDeclarationExpression = ParserHelper<BlockExpression>(try parser.parse()[0])!.e
+    let expr = try parse(input)
+    let blockExpr = BlockExpression(
+      statements: [
+        VarDeclarationExpression(
+          variableIdentifier: IdentifierExpression(value: "a"),
+          variableValue: BinaryOpExpression(
+            left: BinaryOpExpression(
+              left: LiteralExpression(value: 1), op: "+", right: LiteralExpression(value: 2)),
+            op: "-", right: LiteralExpression(value: 3)),
+          variableType: .int),
+        VarDeclarationExpression(
+          variableIdentifier: IdentifierExpression(value: "b"),
+          variableValue: LiteralExpression<Bool>(value: true),
+          variableType: .bool)
+      ], resultExpression: nil
+    )
     XCTAssertEqual(
-      varDeclarationExpression,
+      expr,
       BlockExpression(
-        statements: [
-          VarDeclarationExpression(
-            variableIdentifier: IdentifierExpression(value: "a"),
-            variableValue: BinaryOpExpression(
-              left: BinaryOpExpression(
-                left: LiteralExpression<Int>(value: 1), op: "+",
-                right: LiteralExpression<Int>(value: 2)), op: "-",
-              right: LiteralExpression(value: 3)),
-            variableType: .int),
-          VarDeclarationExpression(
-            variableIdentifier: IdentifierExpression(value: "b"),
-            variableValue: LiteralExpression<Bool>(value: true),
-            variableType: .bool)
-        ], resultExpression: nil))
+        statements: [], resultExpression: blockExpr)
+    )
   }
 
   func test_parsing_invalid_blocks_throw_error() throws {
     let inputs = ["{ a b }", "{ if true then { a } b c }"]
-    for input in inputs {
-      var parser = Parser(tokens: try tokenizeInput(input))
-      XCTAssertThrowsError(try parser.parse())
-    }
+    try inputs.forEach { XCTAssertThrowsError(try parse($0)) }
   }
 
   func test_parsing_valid_blocks_does_not_throw() throws {
     let inputs = [
-      "{ { a } { b } }", "{ if true then { a } b }", "{ if true then { a }; b }",
-      "{ if true then { a } b; c }", "{ if true then { a } else { b } 3 }",
+      "{ { a } { b } }",
+      "{ if true then { a } b }",
+      "{ if true then { a }; b }",
+      "{ if true then { a } b; c }",
+      "{ if true then { a } else { b } 3 }",
       "x = { { f(a) } { b } }"
     ]
-    for input in inputs {
-      var parser = Parser(tokens: try tokenizeInput(input))
-      XCTAssertNoThrow(try parser.parse())
-    }
+
+    try inputs.forEach { XCTAssertNoThrow(try parse($0)) }
   }
 
   func test_parsing_while_expression() throws {
-    var parser = Parser(tokens: try tokenizeInput("while true do { a = a + 1; }"))
-    let whileExpression = ParserHelper<WhileExpression>(try parser.parse()[0])!.e
+    let expr = try parse("while true do { a = a + 1; }")
+    let whileExpr = WhileExpression(
+      condition: LiteralExpression<Bool>(value: true),
+      body: BlockExpression(
+        statements: [
+          BinaryOpExpression(
+            left: IdentifierExpression(value: "a"), op: "=",
+            right: BinaryOpExpression(
+              left: IdentifierExpression(value: "a"), op: "+", right: LiteralExpression(value: 1))
+          )
+        ], resultExpression: nil
+      )
+    )
     XCTAssertEqual(
-      whileExpression,
-      WhileExpression(
-        condition: LiteralExpression(value: true),
-        body: BlockExpression(
-          statements: [
-            BinaryOpExpression(
-              left: IdentifierExpression(value: "a"), op: "=",
-              right: BinaryOpExpression(
-                left: IdentifierExpression(value: "a"), op: "+", right: LiteralExpression(value: 1))
-            )
-          ], resultExpression: nil)))
+      expr,
+      BlockExpression(statements: [], resultExpression: whileExpr)
+    )
   }
 }
 
@@ -300,6 +351,11 @@ extension ParserTests {
     var tokenizer = Tokenizer(input: input)
     try tokenizer.tokenize()
     return tokenizer.tokens
+  }
+
+  func parse(_ input: String) throws -> BlockExpression {
+    var parser = Parser(tokens: try tokenizeInput(input))
+    return try parser.parse()
   }
 }
 
