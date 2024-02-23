@@ -47,7 +47,7 @@ final class ParserTests: XCTestCase {
     let bOpE = BinaryOpExpression(
       left: LiteralExpression(value: 10),
       op: "+",
-      right: NotExpression(value: LiteralExpression(value: 10))
+      right: NotExpression(value: LiteralExpression(value: 10), notOp: "-")
     )
     XCTAssertEqual(
       expr,
@@ -200,7 +200,7 @@ extension ParserTests {
 
   func test_parse_not_expression() throws {
     let expr = try parse("not true")
-    let nExpr = NotExpression(value: LiteralExpression<Bool>(value: true))
+    let nExpr = NotExpression(value: LiteralExpression<Bool>(value: true), notOp: "not")
     XCTAssertEqual(
       expr,
       BlockExpression(statements: [], resultExpression: nExpr)

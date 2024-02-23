@@ -47,7 +47,7 @@ struct Parser {
     }
 
     if ["not", "-"].contains(token.value) {
-      return try parseNotExpression()
+      return try parseNotExpression(notOp: token.value)
     }
 
     if token.value == "(" {
@@ -249,13 +249,13 @@ extension Parser {
 
   /// Parses a not expresison. Chained nots are parsed as a single not expression.
   /// - Returns: A not expression or the nots cancel out
-  private mutating func parseNotExpression() throws -> (any Expression)? {
+  private mutating func parseNotExpression(notOp: String) throws -> (any Expression)? {
     var not = false
     var latestToken: Token?
     while let token = peek() {
       latestToken = token
       if ["not", "-"].contains(token.value) {
-        _ = try consume()
+        _ = try consume(notOp)
         not = !not
       } else {
         break
@@ -268,7 +268,7 @@ extension Parser {
 
     let location = try Location.combineLocations(lhs: latestToken?.location, rhs: value.location)
 
-    return not ? NotExpression(value: value, location: location) : value
+    return not ? NotExpression(value: value, notOp: notOp, location: location) : value
   }
 
   /// Parses a literal expression. Currently supported Int and Bool literals.
