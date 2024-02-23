@@ -181,11 +181,24 @@ extension Typechecker {
     var typedExpression = expression
     typedExpression.value = try typecheck(typedExpression.value)
 
-    guard typedExpression.value.type == .bool || typedExpression.value.type == .int else {
+    let valueType = typedExpression.value.type
+
+    guard valueType == .bool || valueType == .int else {
       throw TypecheckerError.inaproppriateType(
-        expected: [.bool, .int], got: [typedExpression.value.type], location: expression.location
+        expected: [.bool, .int], got: [valueType], location: expression.location
       )
     }
+
+    guard
+      (valueType == .bool && typedExpression.notOp == "not")
+        || (valueType == .int && typedExpression.notOp == "-")
+    else {
+      let expectedNotOP = valueType == .bool ? "not" : "-"
+      throw TypecheckerError.inaproppriateUnaryOp(
+        expected: expectedNotOP, got: typedExpression.notOp, location: typedExpression.location
+      )
+    }
+
     typedExpression.type = typedExpression.value.type
     return typedExpression
   }

@@ -125,15 +125,15 @@ final class TypechkerTests: XCTestCase {
   func test_typecheck_not_expression() throws {
     var typechecker = Typechecker()
     let boolExpression = try toExpression("not true").resultExpression as! NotExpression
-    let intExpression = try toExpression("not not not 1").resultExpression as! NotExpression
+    let intExpression = try toExpression("-1").resultExpression as! NotExpression
     let blockExpression =
-      try toExpression("not { var x = 2; x }").resultExpression as! NotExpression
+      try toExpression("not { var x = true; x }").resultExpression as! NotExpression
     let boolExpressionTyped = try typechecker.typecheck(boolExpression)
     let intExpressionTyped = try typechecker.typecheck(intExpression)
     let blockExpressionTyped = try typechecker.typecheck(blockExpression)
     XCTAssertEqual(boolExpressionTyped.type, Type.bool)
     XCTAssertEqual(intExpressionTyped.type, Type.int)
-    XCTAssertEqual(blockExpressionTyped.type, Type.int)
+    XCTAssertEqual(blockExpressionTyped.type, Type.bool)
   }
 
   func test_typecheck_invalid_not_expression_throws() throws {
@@ -144,6 +144,12 @@ final class TypechkerTests: XCTestCase {
         TypecheckerError.inaproppriateType(
           expected: [Type.bool, Type.int], got: [Type.unit], location: L(0, 4)
         )
+      )
+    }
+    XCTAssertThrowsError(try typechecker.typecheck(toExpression("not 1"))) { error in
+      XCTAssertEqual(
+        error as? TypecheckerError,
+        TypecheckerError.inaproppriateUnaryOp(expected: "-", got: "not", location: L(0, 4))
       )
     }
   }
