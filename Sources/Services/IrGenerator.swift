@@ -41,7 +41,7 @@ struct IrGenerator {
     case let notExpression as NotExpression:
       return try handleNotExpression(notExpression)
     default:
-      fatalError("Unimplemented expression: \(node)")
+      throw IrGeneratorError.unsupportedExpression(expression: node)
     }
   }
 
