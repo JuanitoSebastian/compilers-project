@@ -95,12 +95,20 @@ extension IrGenerator {
   private mutating func handleBinaryOpExpression(
     _ binaryOpExpression: BinaryOpExpression
   ) throws -> IrVar {
-    // TODO: Handle =, and, or
-    let left = try visit(binaryOpExpression.left)
-    let right = try visit(binaryOpExpression.right)
     guard let functionIrVar = symTab.lookup(binaryOpExpression.op) else {
       throw IrGeneratorError.referenceToUndefinedFunction(function: binaryOpExpression.op)
     }
+
+    if binaryOpExpression.op == "and" {
+      return try handleAndOp(binaryOpExpression)
+    }
+
+    if binaryOpExpression.op == "or" {
+      return try handleOrOp(binaryOpExpression)
+    }
+
+    let left = try visit(binaryOpExpression.left)
+    let right = try visit(binaryOpExpression.right)
 
     if binaryOpExpression.op == "=" {
       return handleAssignment(left, right, try unwrapLocation(binaryOpExpression))
@@ -126,6 +134,76 @@ extension IrGenerator {
     )
     instructions.append(copyInstruction)
     return left
+  }
+
+  private mutating func handleAndOp(_ binaryOpExpression: BinaryOpExpression) throws -> IrVar {
+    let location = try unwrapLocation(binaryOpExpression)
+    let left = try visit(binaryOpExpression.left)
+    let andRightLabel = newLabel(location, "and_right")
+    let andSkipLabel = newLabel(location, "and_skip")
+    let andEndLabel = newLabel(location, "and_end")
+
+    let resultVar = try newVar(.bool)
+
+    let condJump = CondJump(
+      condition: left, thenLabel: andRightLabel, elseLabel: andSkipLabel,
+      location: location
+    )
+    instructions.append(condJump)
+
+    let jumpToEnd = Jump(label: andEndLabel, location: location)
+    instructions.append(andRightLabel)
+    let right = try visit(binaryOpExpression.right)
+    let copyRightAsResult = Copy(
+      source: right, destination: resultVar,
+      location: location
+    )
+    instructions.append(copyRightAsResult)
+    instructions.append(jumpToEnd)
+
+    instructions.append(andSkipLabel)
+    let loadInstructionToReesult = LoadConst(
+      value: false, destination: resultVar, location: location)
+    instructions.append(loadInstructionToReesult)
+    instructions.append(andEndLabel)
+    return resultVar
+  }
+
+  private mutating func handleOrOp(_ binaryOpExpression: BinaryOpExpression) throws -> IrVar {
+    let location = try unwrapLocation(binaryOpExpression)
+    let left = try visit(binaryOpExpression.left)
+    let orRightLabel = newLabel(location, "or_right")
+    let orSkipLabel = newLabel(location, "or_skip")
+    let orEndLabel = newLabel(location, "or_end")
+
+    let resultVar = try newVar(.bool)
+
+    let condJump = CondJump(
+      condition: left, thenLabel: orSkipLabel, elseLabel: orRightLabel,
+      location: location
+    )
+
+    instructions.append(condJump)
+
+    instructions.append(orRightLabel)
+    let right = try visit(binaryOpExpression.right)
+    let copyRightAsResult = Copy(
+      source: right, destination: resultVar,
+      location: location
+    )
+    instructions.append(copyRightAsResult)
+    let jumpToEnd = Jump(label: orEndLabel, location: location)
+    instructions.append(jumpToEnd)
+
+    instructions.append(orSkipLabel)
+    let loadInstructionToReesult = LoadConst(
+      value: true, destination: resultVar, location: location
+    )
+    instructions.append(loadInstructionToReesult)
+    instructions.append(jumpToEnd)
+
+    instructions.append(orEndLabel)
+    return resultVar
   }
 
   private mutating func handleVarDeclarationExpression(

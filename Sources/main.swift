@@ -1,6 +1,5 @@
 let input = """
-  var a = 2 == 3;
-  var b = 2 + 3;
+  var a = true or true;
   """
 var tokenizer = Tokenizer(input: input)
 try tokenizer.tokenize()
