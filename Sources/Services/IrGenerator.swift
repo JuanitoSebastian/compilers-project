@@ -350,7 +350,8 @@ extension IrGenerator {
   private mutating func handleNotExpression(
     _ notExpression: NotExpression
   ) throws -> IrVar {
-    guard let notFunction = symTab.lookup("unary_not") else {
+    let unaryFuncName = "unary_\(notExpression.notOp)"
+    guard let notFunction = symTab.lookup(unaryFuncName) else {
       throw IrGeneratorError.referenceToUndefinedFunction(function: "not")
     }
     let valueVar = try visit(notExpression.value)
