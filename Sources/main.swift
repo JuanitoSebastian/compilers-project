@@ -1,6 +1,6 @@
 let input = """
-  var n: Bool = not true;
-  print_bool(n);
+  var a = 2 == 3;
+  var b = 2 + 3;
   """
 var tokenizer = Tokenizer(input: input)
 try tokenizer.tokenize()

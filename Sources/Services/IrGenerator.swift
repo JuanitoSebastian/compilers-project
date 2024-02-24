@@ -98,10 +98,15 @@ extension IrGenerator {
     // TODO: Handle =, and, or
     let left = try visit(binaryOpExpression.left)
     let right = try visit(binaryOpExpression.right)
-    let irVar = try newVar(try unwrapType(binaryOpExpression))
     guard let functionIrVar = symTab.lookup(binaryOpExpression.op) else {
       throw IrGeneratorError.referenceToUndefinedFunction(function: binaryOpExpression.op)
     }
+
+    if binaryOpExpression.op == "=" {
+      return handleAssignment(left, right, try unwrapLocation(binaryOpExpression))
+    }
+
+    let irVar = try newVar(try unwrapType(binaryOpExpression))
     let instruction = Call(
       function: functionIrVar,
       arguments: [left, right],
@@ -110,6 +115,17 @@ extension IrGenerator {
     )
     instructions.append(instruction)
     return irVar
+  }
+
+  private mutating func handleAssignment(
+    _ left: IrVar, _ right: IrVar, _ location: Location
+  ) -> IrVar {
+    let copyInstruction = Copy(
+      source: right, destination: left,
+      location: location
+    )
+    instructions.append(copyInstruction)
+    return left
   }
 
   private mutating func handleVarDeclarationExpression(
