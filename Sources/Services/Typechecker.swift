@@ -1,6 +1,7 @@
 struct Typechecker {
   var symTab: SymTab<Type> = SymTab()
-  var funcTypesTab: SymTab<(params: [Type], returns: Type)> = SymTab(builtInFuncTypes)
+  var funcTypesTab: SymTab<(params: [FunctionParameterType], returns: Type)> = SymTab(
+    builtInFuncTypes)
 
   mutating func typecheck(_ expression: (any Expression)) throws -> any Expression {
     var expressionToReturn = expression
@@ -60,11 +61,26 @@ extension Typechecker {
       throw TypecheckerError.unsupportedOperator(op: expression.op, location: expression.location)
     }
 
-    guard expectedTypes.params == [typedExpression.left.type, typedExpression.right.type] else {
-      throw TypecheckerError.inaproppriateType(
-        expected: expectedTypes.params,
-        got: [typedExpression.left.type, typedExpression.right.type], location: expression.location
-      )
+    if expectedTypes.params.first == .equalType {
+      guard typedExpression.left.type == typedExpression.right.type else {
+        throw TypecheckerError.inaproppriateType(
+          expected: [typedExpression.left.type], got: [typedExpression.right.type],
+          location: expression.location
+        )
+      }
+    } else {
+      guard
+        expectedTypes.params == [
+          .definiteType(typedExpression.left.type),
+          .definiteType(typedExpression.right.type)
+        ]
+      else {
+        throw TypecheckerError.inaproppriateFunctionParameterType(
+          expected: expectedTypes.params,
+          got: [typedExpression.left.type, typedExpression.right.type],
+          location: expression.location
+        )
+      }
     }
 
     typedExpression.type = expectedTypes.returns
@@ -223,8 +239,9 @@ extension Typechecker {
 
     typedExpression.arguments = try expression.arguments.enumerated().map { index, argument in
       let typedArgument = try typecheck(argument)
-      guard typedArgument.type == expectedTypes.params[index] else {
-        throw TypecheckerError.inaproppriateType(
+      guard FunctionParameterType.definiteType(typedArgument.type) == expectedTypes.params[index]
+      else {
+        throw TypecheckerError.inaproppriateFunctionParameterType(
           expected: [expectedTypes.params[index]], got: [typedArgument.type],
           location: argument.location
         )
