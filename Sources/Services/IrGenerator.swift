@@ -12,9 +12,17 @@ struct IrGenerator {
     try self.varTypes.insert(.unit, for: unitVar)
   }
 
+  init(expression: any Expression) throws {
+    try self.init(expressions: [expression])
+  }
+
   mutating func generate() throws {
-    for expression in expressions {
-      _ = try visit(expression)
+    let last: (irVar: IrVar?, expression: (any Expression)?) =
+      try expressions.reduce((nil, nil)) { _, expression in
+        return (try visit(expression), expression)
+      }
+    if let lastIrVar = last.irVar, let lastExpression = last.expression {
+      handleLastIrVar(lastIrVar, location: try unwrapLocation(lastExpression))
     }
   }
 
@@ -215,15 +223,16 @@ extension IrGenerator {
       )
     }
 
+    let valueDest = try newVar(try unwrapType(varDeclarationExpression.variableValue))
+
     let valueIrVar = try visit(varDeclarationExpression.variableValue)
-    let variableIrVar = try newVar(try unwrapType(varDeclarationExpression.variableValue))
     let copyInstruction = Copy(
-      source: valueIrVar, destination: variableIrVar,
+      source: valueIrVar, destination: valueDest,
       location: try unwrapLocation(varDeclarationExpression)
     )
-    try symTab.insert(variableIrVar, for: varDeclarationExpression.variableIdentifier.value)
+    try symTab.insert(valueDest, for: varDeclarationExpression.variableIdentifier.value)
     instructions.append(copyInstruction)
-    return variableIrVar
+    return valueDest
   }
 
   private func handleIdentifierExpression(
@@ -290,16 +299,13 @@ extension IrGenerator {
     _ blockExpression: BlockExpression
   ) throws -> IrVar {
     symTab.push()
-    varTypes.push()
     blockExpression.statements.forEach { _ = try? visit($0) }
     guard let resultExpression = blockExpression.resultExpression else {
       _ = try symTab.pop()
-      _ = try varTypes.pop()
       return unitVar
     }
     let resultVar = try visit(resultExpression)
     _ = try symTab.pop()
-    _ = try varTypes.pop()
     return resultVar
   }
 
@@ -364,5 +370,31 @@ extension IrGenerator {
     )
     instructions.append(notCall)
     return notVar
+  }
+
+  private mutating func handleLastIrVar(_ lastIrVar: IrVar, location: Location) {
+    guard let lastIrVarType = varTypes.lookup(lastIrVar) else {
+      return
+    }
+
+    if lastIrVarType == .bool {
+      let printBoolFunc = symTab.lookup("print_bool")!
+      let printBoolCall = Call(
+        function: printBoolFunc,
+        arguments: [lastIrVar],
+        destination: unitVar,
+        location: location
+      )
+      instructions.append(printBoolCall)
+    } else if lastIrVarType == .int {
+      let printIntFunc = symTab.lookup("print_int")!
+      let printIntCall = Call(
+        function: printIntFunc,
+        arguments: [lastIrVar],
+        destination: unitVar,
+        location: location
+      )
+      instructions.append(printIntCall)
+    }
   }
 }
