@@ -298,14 +298,11 @@ extension IrGenerator {
   private mutating func handleBlockExpression(
     _ blockExpression: BlockExpression
   ) throws -> IrVar {
-    symTab.push()
     blockExpression.statements.forEach { _ = try? visit($0) }
     guard let resultExpression = blockExpression.resultExpression else {
-      _ = try symTab.pop()
       return unitVar
     }
     let resultVar = try visit(resultExpression)
-    _ = try symTab.pop()
     return resultVar
   }
 
