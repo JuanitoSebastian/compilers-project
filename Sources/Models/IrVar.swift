@@ -1,4 +1,4 @@
-struct IrVar: CustomStringConvertible, Equatable {
+struct IrVar: CustomStringConvertible, Equatable, Hashable {
   let name: String
 
   var description: String {
