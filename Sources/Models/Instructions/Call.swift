@@ -9,6 +9,10 @@ struct Call: Instruction, Equatable, CustomStringConvertible {
       && lhs.destination == rhs.destination && lhs.location == rhs.location
   }
 
+  var irVariables: [IrVar] {
+    return [function, destination] + arguments
+  }
+
   var description: String {
     return "Call(\(function), \(arguments), \(destination))"
   }

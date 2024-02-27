@@ -9,6 +9,10 @@ where Element: LiteralExpressionValue, Element: Equatable {
       && lhs.location == rhs.location
   }
 
+  var irVariables: [IrVar] {
+    return [destination]
+  }
+
   var description: String {
     let typeDescription = String(describing: Element.self)
     return "Load\(typeDescription)Const (\(value), \(destination))"

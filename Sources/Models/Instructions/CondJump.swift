@@ -9,6 +9,10 @@ struct CondJump: Instruction, Equatable, CustomStringConvertible {
       && lhs.elseLabel == rhs.elseLabel && lhs.location == rhs.location
   }
 
+  var irVariables: [IrVar] {
+    return [condition]
+  }
+
   var description: String {
     return "CondJump(\(condition), \(thenLabel), \(elseLabel))"
   }

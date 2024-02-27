@@ -8,6 +8,10 @@ struct Copy: Instruction, Equatable, CustomStringConvertible {
       && lhs.location == rhs.location
   }
 
+  var irVariables: [IrVar] {
+    return [source, destination]
+  }
+
   var description: String {
     return "Copy(\(source), \(destination))"
   }
