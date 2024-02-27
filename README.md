@@ -13,3 +13,9 @@ Tests can be run with:
 docker build -t swiftcompiler-test -f test.Dockerfile .  
 docker run swiftcompiler-test
 ```
+
+Building assembly using gcc:
+```zsh
+docker-compose -f compose-dev.yaml run --rm gcc
+
+```

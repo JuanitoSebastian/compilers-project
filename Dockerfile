@@ -8,5 +8,10 @@ WORKDIR /app
 COPY . .
 
 # Compile the project
+
+RUN apt-get update && \
+  apt-get -y install gcc mono-mcs && \
+  rm -rf /var/lib/apt/lists/*
+
 RUN swift build
 CMD swift run
