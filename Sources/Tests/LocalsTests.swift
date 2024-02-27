@@ -16,8 +16,8 @@ final class LocalsTests: XCTestCase {
 
   func test_locals_ir_var_locations() throws {
     let locals = Locals(irVariables: irVariables)
-    let locationNums = [0, 8, 16]
-    let locationStrings = ["-0(%rbp)", "-8(%rbp)", "-16(%rbp)"]
+    let locationNums = [8, 16, 24]
+    let locationStrings = ["-8(%rbp)", "-16(%rbp)", "-24(%rbp)"]
     try irVariables.enumerated().forEach { index, irVar in
       XCTAssertEqual(try locals.getStackLocation(for: irVar), locationNums[index])
       XCTAssertEqual(try locals.gestStackLocation(for: irVar), locationStrings[index])

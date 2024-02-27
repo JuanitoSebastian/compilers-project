@@ -7,7 +7,7 @@ struct Locals {
   init(irVariables: [IrVar]) {
     stackUsed = irVariables.reduce(0) { slot, irVar in
       let nextSlot = slot + SLOT_SIZE
-      varStackLocations[irVar] = slot
+      varStackLocations[irVar] = nextSlot
       return nextSlot
     }
   }
