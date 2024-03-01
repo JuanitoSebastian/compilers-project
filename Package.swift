@@ -7,17 +7,21 @@ let package = Package(
   name: "swiftcompiler",
   dependencies: [
     .package(url: "https://github.com/realm/SwiftLint.git", from: "0.54.0"),
-    .package(url: "https://github.com/apple/swift-format.git", from: "509.0.0")
+    .package(url: "https://github.com/apple/swift-format.git", from: "509.0.0"),
+    .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "1.2.1"))
   ],
   targets: [
     // Targets are the basic building blocks of a package, defining a module or a test suite.
     // Targets can depend on other targets in this package and products from dependencies.
     .executableTarget(
-      name: "swiftcompiler", exclude: ["Tests"]),
+      name: "swiftcompiler",
+      dependencies: [.product(name: "ArgumentParser", package: "swift-argument-parser")],
+      exclude: ["Tests"]
+    ),
     .testTarget(
       name: "swiftcompilerTests",
       dependencies: ["swiftcompiler"],
-      exclude: ["main.swift", "Models", "Utils", "Services"],
+      exclude: ["SwiftCompiler.swift", "Models", "Utils", "Services"],
       sources: ["Tests"])
   ]
 )
