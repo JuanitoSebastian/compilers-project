@@ -1,9 +1,0 @@
-version: "3.7"
-services:
-  gcc:
-    image: gcc:latest
-    container_name: gcc
-    volumes:
-      - .:/usr/src/myapp
-    working_dir: /usr/src/myapp
-    command: /bin/bash

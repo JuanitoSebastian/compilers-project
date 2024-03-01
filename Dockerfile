@@ -14,4 +14,3 @@ RUN apt-get update && \
   rm -rf /var/lib/apt/lists/*
 
 RUN swift build
-CMD swift run

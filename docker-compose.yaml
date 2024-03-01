@@ -1,0 +1,12 @@
+version: "3.7"
+services:
+  swiftcompiler:
+    image: swiftcompiler
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: swiftcompiler
+    volumes:
+      - .:/usr/src/myapp
+    working_dir: /usr/src/myapp
+    command: /bin/bash
