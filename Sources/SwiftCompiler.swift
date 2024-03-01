@@ -11,6 +11,9 @@ struct SwiftCompiler: ParsableCommand {
   @Option(name: .shortAndLong, help: "Path to output file")
   var outputFile: String?
 
+  @Flag(name: [.customLong("ir")], help: "Output IR instead of assembly")
+  var compileIr: Bool = false
+
   static var configuration = CommandConfiguration(
     commandName: "swiftcompiler",
     abstract: "A Swift compiler"
@@ -29,7 +32,12 @@ struct SwiftCompiler: ParsableCommand {
       try irGenerator.generate()
       var assemblyGenerator = AssemblyGenerator(instructions: irGenerator.instructions)
       try assemblyGenerator.generate()
-      let outputString = assemblyGenerator.asm
+      let outputString =
+        compileIr
+        ? irGenerator.instructions
+          .map { $0.description }
+          .joined(separator: "\n")
+        : assemblyGenerator.asm
 
       guard let outputFile = outputFile else {
         print(outputString)

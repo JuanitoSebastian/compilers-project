@@ -6,7 +6,7 @@ struct AssemblyGenerator {
   let locals: Locals
 
   var asm: String {
-    return stdlibAsmCode + "\n" + asmInstructions.joined(separator: "\n")
+    return asmInstructions.joined(separator: "\n")
   }
 
   init(instructions: [(any Instruction)]) {
@@ -88,10 +88,30 @@ extension AssemblyGenerator {
   }
 
   private mutating func handleCall(_ call: Call) throws {
+    if call.function.description == "+" {
+      let lhsLocation: String = try locals.gestStackLocation(for: call.arguments[0])
+      let rhsLocation: String = try locals.gestStackLocation(for: call.arguments[1])
+      let destLocation: String = try locals.gestStackLocation(for: call.destination)
+      emit("movq \(lhsLocation), %rax")
+      emit("addq \(rhsLocation), %rax")
+      emit("movq %rax, \(destLocation)")
+      return
+    }
 
+    if call.function.description == "print_int" {
+      let argLocation: String = try locals.gestStackLocation(for: call.arguments[0])
+      emit("movq \(argLocation), %rdi")
+      emit("call print_int")
+      return
+    }
   }
 
   private mutating func startFile() {
+    emit(".global main")
+    emit(".type main, @function")
+    emit(".extern print_int")
+    emit(".section .text")
+    emit("")
     emit("main:")
     emit("pushq %rbp")
     emit("movq %rsp, %rbp")
@@ -100,7 +120,7 @@ extension AssemblyGenerator {
 
   private mutating func endFile() {
     emit("")
-    emit(".Lend")
+    emit(".Lend:")
     emit("movq $0, %rax")
     emit("movq %rbp, %rsp")
     emit("popq %rbp")
