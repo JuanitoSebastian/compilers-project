@@ -11,7 +11,7 @@ final class LocalsTests: XCTestCase {
 
   func test_locals_inits() {
     let locals = Locals(irVariables: irVariables)
-    XCTAssertEqual(locals.stackUsed, 24)
+    XCTAssertEqual(locals.stackSize, 24)
   }
 
   func test_locals_ir_var_locations() throws {

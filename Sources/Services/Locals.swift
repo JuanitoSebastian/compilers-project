@@ -1,11 +1,11 @@
 let SLOT_SIZE = 8
 
 struct Locals {
-  var varStackLocations: [IrVar: Int] = [:]
-  var stackUsed: Int = 0
+  private var varStackLocations: [IrVar: Int] = [:]
+  private(set) var stackSize: Int = 0
 
   init(irVariables: [IrVar]) {
-    stackUsed = irVariables.reduce(0) { slot, irVar in
+    stackSize = irVariables.reduce(0) { slot, irVar in
       let nextSlot = slot + SLOT_SIZE
       varStackLocations[irVar] = nextSlot
       return nextSlot
