@@ -8,8 +8,8 @@ struct SwiftCompiler: ParsableCommand {
   @Option(name: .shortAndLong, help: "Path to input file")
   var inputFile: String?
 
-  @Option(name: .shortAndLong, help: "Path to output file")
-  var outputFile: String?
+  @Option(name: .shortAndLong, help: "Output file name")
+  var outputFileName: String = "output"
 
   @Flag(name: [.customLong("ir")], help: "Output IR instead of assembly")
   var compileIr: Bool = false
@@ -20,7 +20,10 @@ struct SwiftCompiler: ParsableCommand {
   )
 
   mutating func run() {
+    let fileHelper = FileHelper()
     do {
+      try fileHelper.creatNeededDirectories()
+
       let input = try getProvidedInput()
       var tokenizer = Tokenizer(input: input)
       try tokenizer.tokenize()
@@ -32,19 +35,11 @@ struct SwiftCompiler: ParsableCommand {
       try irGenerator.generate()
       var assemblyGenerator = AssemblyGenerator(instructions: irGenerator.instructions)
       try assemblyGenerator.generate()
-      let outputString =
-        compileIr
-        ? irGenerator.instructions
-          .map { $0.description }
-          .joined(separator: "\n")
-        : assemblyGenerator.asm
 
-      guard let outputFile = outputFile else {
-        print(outputString)
-        return
-      }
-
-      try writeToFile(outputFile, output: outputString)
+      try writeToFile(asmOutputFileName, output: assemblyGenerator.asm)
+      try createObjectFile(asmOutputFileName, objectOutputFileName)
+      try createObjectFile(stdLibAsmFileName, stdLibObjOutputFileName)
+      try runLinker(stdLibObjOutputFileName, objectOutputFileName, programOutputFileName)
 
     } catch {
       print(error)
@@ -64,4 +59,28 @@ struct SwiftCompiler: ParsableCommand {
   private func writeToFile(_ fileName: String, output: String) throws {
     try output.write(toFile: fileName, atomically: true, encoding: .utf8)
   }
+}
+
+extension SwiftCompiler {
+
+  var asmOutputFileName: String {
+    return "build/temp/\(outputFileName).s"
+  }
+
+  var objectOutputFileName: String {
+    return "build/temp/\(outputFileName).o"
+  }
+
+  var programOutputFileName: String {
+    return "build/\(outputFileName)"
+  }
+
+  var stdLibAsmFileName: String {
+    return "asm_utils/stdlib.s"
+  }
+
+  var stdLibObjOutputFileName: String {
+    return "build/temp/stdlib.o"
+  }
+
 }
