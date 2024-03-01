@@ -1,6 +1,7 @@
 import Foundation
 
 struct AssemblyGenerator {
+  let intrinsicsHandler = IntrinsicsHandler()
   var asmInstructions: [String] = []
   let instructions: [(any Instruction)]
   let locals: Locals
@@ -47,6 +48,10 @@ extension AssemblyGenerator {
     asmInstructions.append(asmToAppend)
   }
 
+  private mutating func emit(_ asmToAppend: [String]) {
+    asmInstructions.append(contentsOf: asmToAppend)
+  }
+
   private mutating func handleJumpInstruction(_ jump: Jump) {
     emit("jmp .L\(jump.label)")
   }
@@ -88,13 +93,14 @@ extension AssemblyGenerator {
   }
 
   private mutating func handleCall(_ call: Call) throws {
-    if call.function.description == "+" {
-      let lhsLocation: String = try locals.gestStackLocation(for: call.arguments[0])
-      let rhsLocation: String = try locals.gestStackLocation(for: call.arguments[1])
-      let destLocation: String = try locals.gestStackLocation(for: call.destination)
-      emit("movq \(lhsLocation), %rax")
-      emit("addq \(rhsLocation), %rax")
-      emit("movq %rax, \(destLocation)")
+    if intrinsicsOps.contains(call.function.description) {
+      let intrinsicsArgs = IntrinsicsArgs(
+        argsRefs: try call.arguments.map { try locals.gestStackLocation(for: $0) },
+        resultRegister: try locals.gestStackLocation(for: call.destination)
+      )
+      let intrinsicAsm = try intrinsicsHandler.handleIntrinsic(
+        call.function.description, intrinsicsArgs)
+      emit(intrinsicAsm)
       return
     }
 
@@ -125,5 +131,6 @@ extension AssemblyGenerator {
     emit("movq %rbp, %rsp")
     emit("popq %rbp")
     emit("ret")
+    emit("")
   }
 }
