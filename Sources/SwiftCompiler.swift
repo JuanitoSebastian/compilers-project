@@ -29,7 +29,7 @@ struct SwiftCompiler: ParsableCommand {
       try irGenerator.generate()
       var assemblyGenerator = AssemblyGenerator(instructions: irGenerator.instructions)
       try assemblyGenerator.generate()
-      let outputString = assemblyGenerator.asm.joined(separator: "\n")
+      let outputString = assemblyGenerator.asm
 
       guard let outputFile = outputFile else {
         print(outputString)

@@ -251,4 +251,5 @@ let stdlibAsmCode = """
   read_int_error_str:
       .ascii "Error: read_int() failed to read input\\n"
   read_int_error_str_len = . - read_int_error_str
+
   """

@@ -1,9 +1,13 @@
 import Foundation
 
 struct AssemblyGenerator {
-  var asm: [String] = []
+  var asmInstructions: [String] = []
   let instructions: [(any Instruction)]
   let locals: Locals
+
+  var asm: String {
+    return stdlibAsmCode + "\n" + asmInstructions.joined(separator: "\n")
+  }
 
   init(instructions: [(any Instruction)]) {
     self.instructions = instructions
@@ -11,32 +15,36 @@ struct AssemblyGenerator {
   }
 
   mutating func generate() throws {
-    for instruction in instructions {
-      switch instruction {
-      case let label as Label:
-        handleLabel(label)
-      case let jump as Jump:
-        handleJumpInstruction(jump)
-      case let loadInt as LoadConst<Int>:
-        try handleLoadInt(loadInt)
-      case let loadBool as LoadConst<Bool>:
-        try handleLoadBool(loadBool)
-      case let copy as Copy:
-        try handleCopy(copy)
-      case let condJump as CondJump:
-        try handleConditionalJump(condJump)
-      default:
-        fatalError("Not implemented: \(type(of: instruction.self))")
-      }
-    }
-
+    startFile()
+    try instructions.forEach { try handleInstruction($0) }
     endFile()
   }
 }
 
 extension AssemblyGenerator {
+  private mutating func handleInstruction(_ instruction: any Instruction) throws {
+    switch instruction {
+    case let label as Label:
+      handleLabel(label)
+    case let jump as Jump:
+      handleJumpInstruction(jump)
+    case let loadInt as LoadConst<Int>:
+      try handleLoadInt(loadInt)
+    case let loadBool as LoadConst<Bool>:
+      try handleLoadBool(loadBool)
+    case let copy as Copy:
+      try handleCopy(copy)
+    case let condJump as CondJump:
+      try handleConditionalJump(condJump)
+    case let call as Call:
+      try handleCall(call)
+    default:
+      fatalError("Not implemented: \(type(of: instruction.self))")
+    }
+  }
+
   private mutating func emit(_ asmToAppend: String) {
-    asm.append(asmToAppend)
+    asmInstructions.append(asmToAppend)
   }
 
   private mutating func handleJumpInstruction(_ jump: Jump) {
@@ -77,6 +85,17 @@ extension AssemblyGenerator {
     emit("cmpq $0, \(conditionLocation)")
     emit("jne .L\(condJump.thenLabel.label)")
     emit("jmp .L\(condJump.elseLabel.label)")
+  }
+
+  private mutating func handleCall(_ call: Call) throws {
+
+  }
+
+  private mutating func startFile() {
+    emit("main:")
+    emit("pushq %rbp")
+    emit("movq %rsp, %rbp")
+    emit("subq $\(locals.stackSize), %rsp")
   }
 
   private mutating func endFile() {
