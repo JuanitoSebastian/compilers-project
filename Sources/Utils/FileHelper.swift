@@ -9,7 +9,9 @@ struct FileHelper {
 
   private func createDirIfNotExists(_ dir: String) throws {
     if !FileManager.default.fileExists(atPath: dir) {
-      try FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true, attributes: nil)
+      try FileManager.default.createDirectory(
+        atPath: dir, withIntermediateDirectories: true, attributes: nil
+      )
     }
   }
 }
