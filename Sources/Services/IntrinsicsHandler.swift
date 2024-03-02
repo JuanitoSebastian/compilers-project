@@ -71,10 +71,11 @@ struct IntrinsicsHandler {
 
   func multiply(_ args: IntrinsicsArgs) -> [String] {
     var result: [String] = []
-    if args.resultRegister != args.argsRefs[0] {
-      result.append("movq \(args.argsRefs[0]), \(args.resultRegister)")
+    result.append("movq \(args.argsRefs[0]), %rax")
+    result.append("imulq \(args.argsRefs[1]), %rax")
+    if args.resultRegister != "%rax" {
+      result.append("movq %rax, \(args.resultRegister)")
     }
-    result.append("imulq \(args.argsRefs[1]), \(args.resultRegister)")
     return result
   }
 
