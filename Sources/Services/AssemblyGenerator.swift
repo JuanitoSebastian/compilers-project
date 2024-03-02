@@ -53,7 +53,7 @@ extension AssemblyGenerator {
   }
 
   private mutating func handleJumpInstruction(_ jump: Jump) {
-    emit("jmp .L\(jump.label)")
+    emit("jmp .L\(jump.label.label)")
   }
 
   private mutating func handleLabel(_ label: Label) {
