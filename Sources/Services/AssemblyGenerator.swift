@@ -110,6 +110,13 @@ extension AssemblyGenerator {
       emit("call print_int")
       return
     }
+
+    if call.function.description == "print_bool" {
+      let argLocation: String = try locals.gestStackLocation(for: call.arguments[0])
+      emit("movq \(argLocation), %rdi")
+      emit("call print_bool")
+      return
+    }
   }
 
   private mutating func startFile() {
