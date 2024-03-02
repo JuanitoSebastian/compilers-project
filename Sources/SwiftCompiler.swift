@@ -27,7 +27,7 @@ struct SwiftCompiler: ParsableCommand {
     do {
       try fileHelper.creatNeededDirectories()
 
-      let outputToWrite = try handleGivenInput()
+      let outputToWrite = try compileGivenInput()
 
       if printOutput {
         print(outputToWrite)
@@ -102,7 +102,7 @@ extension SwiftCompiler {
     }
   }
 
-  func handleGivenInput() throws -> String {
+  func compileGivenInput() throws -> String {
     let input = try getProvidedInput()
     var tokenizer = Tokenizer(input: input)
     try tokenizer.tokenize()
