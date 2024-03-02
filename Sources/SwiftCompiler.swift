@@ -37,9 +37,10 @@ struct SwiftCompiler: ParsableCommand {
       try assemblyGenerator.generate()
 
       try writeToFile(asmOutputFileName, output: assemblyGenerator.asm)
-      try createObjectFile(asmOutputFileName, objectOutputFileName)
-      try createObjectFile(stdLibAsmFileName, stdLibObjOutputFileName)
-      try runLinker(stdLibObjOutputFileName, objectOutputFileName, programOutputFileName)
+      try handleCompiler({ try createObjectFile(asmOutputFileName, objectOutputFileName) }, description: "Compiling program")
+      try handleCompiler({ try createObjectFile(stdLibAsmFileName, stdLibObjOutputFileName) }, description: "Compiling stdlib")
+      try handleCompiler({ try runLinker(stdLibObjOutputFileName, objectOutputFileName, programOutputFileName) }, description: "Linker")
+      
 
     } catch {
       print(error)
@@ -83,4 +84,10 @@ extension SwiftCompiler {
     return "build/temp/stdlib.o"
   }
 
+  func handleCompiler(_ compilerFunc: () throws -> String?, description: String) throws {
+    let output = try compilerFunc()
+    if let output = output {
+      print("\(description): \(output)")
+    }
+  }
 }

@@ -1,6 +1,6 @@
 import Foundation
 
-func createObjectFile(_ asmFile: String, _ objectFile: String) throws {
+func createObjectFile(_ asmFile: String, _ objectFile: String) throws -> String? {
   let commandToRun = "as -o \(objectFile) \(asmFile)"
   let task = Process()
   let pipe = Pipe()
@@ -15,10 +15,10 @@ func createObjectFile(_ asmFile: String, _ objectFile: String) throws {
 
   let data = pipe.fileHandleForReading.readDataToEndOfFile()
   let output = String(data: data, encoding: .utf8)!
-  print(output)
+  return output == "" ? nil : output
 }
 
-func runLinker(_ stdlibObjFile: String, _ programObjFile: String, _ outputFile: String) throws {
+func runLinker(_ stdlibObjFile: String, _ programObjFile: String, _ outputFile: String) throws -> String? {
   let commandToRun = "ld -o \(outputFile) \(stdlibObjFile) \(programObjFile)"
   let task = Process()
   let pipe = Pipe()
@@ -33,5 +33,5 @@ func runLinker(_ stdlibObjFile: String, _ programObjFile: String, _ outputFile: 
 
   let data = pipe.fileHandleForReading.readDataToEndOfFile()
   let output = String(data: data, encoding: .utf8)!
-  print(output)
+  return output == "" ? nil : output
 }
