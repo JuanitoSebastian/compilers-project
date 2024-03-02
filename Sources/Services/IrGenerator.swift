@@ -16,6 +16,10 @@ struct IrGenerator {
     try self.init(expressions: [expression])
   }
 
+  var ir: String {
+    return instructions.map { $0.description }.joined(separator: "\n")
+  }
+
   mutating func generate() throws {
     let last: (irVar: IrVar?, expression: (any Expression)?) =
       try expressions.reduce((nil, nil)) { _, expression in

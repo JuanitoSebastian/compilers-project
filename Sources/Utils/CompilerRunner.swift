@@ -18,7 +18,11 @@ func createObjectFile(_ asmFile: String, _ objectFile: String) throws -> String?
   return output == "" ? nil : output
 }
 
-func runLinker(_ stdlibObjFile: String, _ programObjFile: String, _ outputFile: String) throws -> String? {
+func runLinker(
+  _ stdlibObjFile: String,
+  _ programObjFile: String,
+  _ outputFile: String
+) throws -> String? {
   let commandToRun = "ld -o \(outputFile) \(stdlibObjFile) \(programObjFile)"
   let task = Process()
   let pipe = Pipe()
