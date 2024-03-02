@@ -302,7 +302,7 @@ extension IrGenerator {
   private mutating func handleBlockExpression(
     _ blockExpression: BlockExpression
   ) throws -> IrVar {
-    blockExpression.statements.forEach { _ = try? visit($0) }
+    try blockExpression.statements.forEach { _ = try visit($0) }
     guard let resultExpression = blockExpression.resultExpression else {
       return unitVar
     }
