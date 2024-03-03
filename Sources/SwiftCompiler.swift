@@ -3,7 +3,7 @@ import ColorizeSwift
 
 @main
 struct SwiftCompiler: ParsableCommand {
-  @Argument(help: "String to parse")
+  @Argument(help: "Input to compile")
   var inputString: String?
 
   @Option(name: .shortAndLong, help: "Path to input file")
