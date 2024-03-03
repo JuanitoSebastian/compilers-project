@@ -1,4 +1,5 @@
 import ArgumentParser
+import ColorizeSwift
 
 @main
 struct SwiftCompiler: ParsableCommand {
@@ -23,7 +24,9 @@ struct SwiftCompiler: ParsableCommand {
   )
 
   mutating func run() {
+    let errorHandler = ErrorHandler()
     let fileHelper = FileHelper()
+
     do {
       try fileHelper.creatNeededDirectories()
 
@@ -52,13 +55,15 @@ struct SwiftCompiler: ParsableCommand {
         description: "Linker"
       )
 
+      print("Compiled to: \(programExecutableFileName.bold())")
     } catch {
-      print(error)
+      errorHandler.handleError(error)
     }
   }
 
   private func getProvidedInput() throws -> String {
     if let inputFile = inputFile {
+      print("Reading input from file: \(inputFile.bold())")
       return try String(contentsOfFile: inputFile)
     } else if let inputString = inputString {
       return inputString
@@ -104,7 +109,7 @@ extension SwiftCompiler {
 
   func compileGivenInput() throws -> String {
     let input = try getProvidedInput()
-    var tokenizer = Tokenizer(input: input)
+    var tokenizer = Tokenizer(input: input, file: inputFile)
     try tokenizer.tokenize()
     var parser = Parser(tokens: tokenizer.tokens)
     var typechecker = Typechecker()
