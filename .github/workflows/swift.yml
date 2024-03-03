@@ -8,6 +8,7 @@ on:
     branches: [ "main" ]
     paths:
       - "**.swift"
+      - ".github/workflows/swift.yml"
   pull_request:
     branches: [ "main" ]
 
