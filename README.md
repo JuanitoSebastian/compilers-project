@@ -1,5 +1,5 @@
 # Compilers project
-This is the course project for the [Compilers](https://hy-compilers.github.io/spring-2024/) course at the University of Helsinki.
+This is the course project for the [Compilers](https://hy-compilers.github.io/spring-2024/) course at the University of Helsinki. This project implements the base language spec of course which is documented [here](https://hy-compilers.github.io/spring-2024/language-spec/).
 
 ## Running & testing
 The program can be run and tested by spawning a shell inside the docker-compose environment.
@@ -26,7 +26,7 @@ OPTIONS:
   -h, --help              Show help information.
 ```
 
-To run compile and run the example program included you can run the following. Programs are compiled to the build folder.
+To run compile and run the example program included you can run the following. Programs are compiled the build folder.
 ```bash
 swift run swiftcompiler -i example.txt
 ./build/output
