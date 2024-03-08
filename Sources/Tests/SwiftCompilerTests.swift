@@ -49,6 +49,27 @@ final class SwiftCompilerTests: XCTestCase {
     let output = try runProgramAndExpectOutput("./build/test")
     XCTAssertEqual(output, ["1", "28931"])
   }
+
+  func test_e2e_more_maths() throws {
+    let inputCode = """
+      var a = 10;
+      var b = 5;
+      var c = 3;
+      var d = 7;
+
+      var result1 = a + b * c - d;
+      print_int(result1);
+      var result2 = (a - b) * (c + d);
+      print_int(result2);
+      var result3 = a % c;
+      print_int(result3);
+      """
+    var test = try XCTUnwrap(SwiftCompiler.parseAsRoot([inputCode, "-o", "test"]))
+    try test.run()
+    XCTAssertTrue(checkFileExists("build/test"))
+    let output = try runProgramAndExpectOutput("./build/test")
+    XCTAssertEqual(output, ["18", "50", "1"])
+  }
 }
 
 extension SwiftCompilerTests {
